@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* ─── Global resets & base ────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* ─── Font utilities ──────────────────────────────────── */
+.font-display  { font-family: 'Poppins', sans-serif; }
+.font-body     { font-family: 'Inter', sans-serif; }
+.font-mono     { font-family: 'IBM Plex Mono', monospace; }
+
+/* ─── Scrollbar hiding for horizontal scroll ──────────── */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Smooth theme transitions ────────────────────────── */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ─── Ink stamp badge ─────────────────────────────────── */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  border-width: 1.5px;
+  border-style: solid;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+  line-height: 1.6;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ─── Custom scrollbar (desktop) ─────────────────────── */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { border-radius: 3px; }
+}
+
+/* ─── Input base resets ───────────────────────────────── */
+input, textarea, select {
+  outline: none;
+  font-family: inherit;
+}
+
+/* ─── Ripple / press animation ───────────────────────── */
+@keyframes press {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.btn-press:active { animation: press 0.15s ease; }
+
+/* ─── Fade-in for screen transitions ─────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-enter { animation: fadeIn 0.22s ease forwards; }
+
+/* ─── Slide-up for new screen push ───────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-slide-up { animation: slideUp 0.25s ease forwards; }
+
+/* ─── Collection row check animation ─────────────────── */
+@keyframes checkPop {
+  0%   { transform: scale(0.8) rotate(-4deg); opacity: 0; }
+  60%  { transform: scale(1.1) rotate(-6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-4deg); opacity: 1; }
+}
+.stamp-pop { animation: checkPop 0.3s ease forwards; }
+
+/* ─── Chart tooltip ───────────────────────────────────── */
+.chart-tooltip {
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+}
