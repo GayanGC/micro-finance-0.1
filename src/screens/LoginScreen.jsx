@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Lock, Phone, Eye, EyeOff, TrendingUp } from 'lucide-react';
 import PrimaryButton from '../components/PrimaryButton.jsx';
+import { AuthContext } from '../context/AuthContext.jsx';
 
-export default function LoginScreen({ t, onLogin }) {
+export default function LoginScreen({ t }) {
   const [phone, setPhone] = useState('');
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useContext(AuthContext);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!phone || pin.length < 4) {
       setError('Please enter your phone number and 4-digit PIN.');
@@ -17,12 +19,14 @@ export default function LoginScreen({ t, onLogin }) {
     }
     setError('');
     setLoading(true);
-    // Simulate async login
-    setTimeout(() => {
+    try {
+      await login(phone, pin);
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
       setLoading(false);
-      onLogin();
-    }, 900);
+    }
   }
+
 
   return (
     <div

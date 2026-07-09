@@ -1,6 +1,10 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { AlertCircle } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import { formatRs } from '../theme.js';
+import { getReportSummary, getReportTrend, getReportBreakdown } from '../api/client.js';
+
 
 function CustomTooltip({ active, payload, label, t }) {
   if (!active || !payload?.length) return null;
@@ -51,8 +55,94 @@ function CustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }) {
   );
 }
 
-export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown, onToggleTheme, onOpenSettings }) {
-  const totalCollected = monthlyCollections.reduce((s, m) => s + m.amount, 0);
+
+
+export default function ReportsScreen({ t, onToggleTheme, onOpenSettings }) {
+  const [summary, setSummary] = useState(null);
+  const [trend, setTrend] = useState([]);
+  const [breakdown, setBreakdown] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchReportData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [summaryRes, trendRes, breakdownRes] = await Promise.all([
+        getReportSummary(),
+        getReportTrend(),
+        getReportBreakdown()
+      ]);
+
+      if (summaryRes && summaryRes.success) {
+        setSummary(summaryRes.data);
+      }
+      if (trendRes && trendRes.success) {
+        setTrend(trendRes.data);
+      }
+      if (breakdownRes && breakdownRes.success) {
+        setBreakdown(breakdownRes.data);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load report data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReportData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
+        <TopBar t={t} title="Reports" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
+        <div className="flex-1 px-4 py-6 flex flex-col gap-6" style={{ overflowY: 'auto' }}>
+          <div className="flex gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse flex-1 h-20 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
+          </div>
+          <div className="animate-pulse h-64 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+          <div className="animate-pulse h-64 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
+        <TopBar t={t} title="Reports" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-3">
+          <AlertCircle size={48} color={t.overdue} />
+          <h3 style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.text }}>Failed to Load Reports</h3>
+          <p style={{ fontSize: '0.85rem', color: t.overdue, textAlign: 'center', maxWidth: '80%' }}>{error}</p>
+          <button
+            onClick={fetchReportData}
+            style={{
+              marginTop: 12,
+              padding: '8px 16px',
+              background: t.primary,
+              color: t.onPrimary,
+              border: 'none',
+              borderRadius: 10,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalCollected = trend.reduce((s, m) => s + m.amount, 0);
+  const activeCount = summary?.activeLoans || 0;
+  const overdueCount = summary?.overdueCount || 0;
   const pieColors = [t.primary, t.accent, t.overdue];
 
   return (
@@ -65,8 +155,8 @@ export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown
         <div className="flex gap-3 mb-5">
           {[
             { label: 'Total (6mo)', value: formatRs(totalCollected), color: t.primary },
-            { label: 'Active Loans', value: '8', color: t.active },
-            { label: 'Overdue', value: '3', color: t.overdue },
+            { label: 'Active Loans', value: activeCount.toString(), color: t.active },
+            { label: 'Overdue', value: overdueCount.toString(), color: t.overdue },
           ].map(({ label, value, color }) => (
             <div
               key={label}
@@ -97,7 +187,7 @@ export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown
             </div>
           </div>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={monthlyCollections} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <BarChart data={trend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={t.border}
@@ -121,11 +211,11 @@ export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown
                 radius={[6, 6, 0, 0]}
                 fill={t.primary}
               >
-                {monthlyCollections.map((entry, i) => (
+                {trend.map((entry, i) => (
                   <Cell
                     key={i}
-                    fill={i === monthlyCollections.length - 1 ? t.accent : t.primary}
-                    opacity={i === monthlyCollections.length - 1 ? 0.8 : 1}
+                    fill={i === trend.length - 1 ? t.accent : t.primary}
+                    opacity={i === trend.length - 1 ? 0.8 : 1}
                   />
                 ))}
               </Bar>
@@ -149,47 +239,55 @@ export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown
           </div>
 
           <div className="flex flex-col lg:flex-row items-center gap-4">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={loanTypeBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={95}
-                  paddingAngle={3}
-                  dataKey="value"
-                  labelLine={false}
-                  label={CustomLabel}
-                >
-                  {loanTypeBreakdown.map((entry, i) => (
-                    <Cell key={i} fill={pieColors[i % pieColors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieTooltip t={t} />} />
-              </PieChart>
-            </ResponsiveContainer>
+            {breakdown.length === 0 ? (
+              <div style={{ fontSize: '0.8rem', color: t.textMuted, textAlign: 'center', width: '100%', padding: '24px 0' }}>
+                No active loan breakdown data.
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={breakdown}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={95}
+                      paddingAngle={3}
+                      dataKey="value"
+                      labelLine={false}
+                      label={CustomLabel}
+                    >
+                      {breakdown.map((entry, i) => (
+                        <Cell key={i} fill={pieColors[i % pieColors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip t={t} />} />
+                  </PieChart>
+                </ResponsiveContainer>
 
-            {/* Legend */}
-            <div className="flex lg:flex-col gap-3 justify-center w-full lg:w-auto lg:min-w-32">
-              {loanTypeBreakdown.map((entry, i) => (
-                <div key={entry.name} className="flex items-center gap-2">
-                  <div
-                    style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 3,
-                      background: pieColors[i % pieColors.length],
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: t.text }}>{entry.name}</div>
-                    <div style={{ fontSize: '0.68rem', color: t.textMuted }}>{entry.value}% · {entry.count} loans</div>
-                  </div>
+                {/* Legend */}
+                <div className="flex lg:flex-col gap-3 justify-center w-full lg:w-auto lg:min-w-32">
+                  {breakdown.map((entry, i) => (
+                    <div key={entry.name} className="flex items-center gap-2">
+                      <div
+                        style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: 3,
+                          background: pieColors[i % pieColors.length],
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: t.text }}>{entry.name}</div>
+                        <div style={{ fontSize: '0.68rem', color: t.textMuted }}>{entry.value}% · {entry.count} loans</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -197,3 +295,4 @@ export default function ReportsScreen({ t, monthlyCollections, loanTypeBreakdown
     </div>
   );
 }
+

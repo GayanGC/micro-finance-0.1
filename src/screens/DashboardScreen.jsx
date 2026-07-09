@@ -1,8 +1,12 @@
-import { CreditCard, HandCoins, BarChart2, TrendingUp, AlertCircle, Clock } from 'lucide-react';
+
+
+import { useState, useEffect } from 'react';
+import { CreditCard, HandCoins, BarChart2, TrendingUp, AlertCircle } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import StatCard from '../components/StatCard.jsx';
 import Stamp from '../components/Stamp.jsx';
 import { formatRs } from '../theme.js';
+import { getReportSummary, getLoans } from '../api/client.js';
 
 function QuickAction({ t, icon: Icon, label, color, onClick }) {
   return (
@@ -34,6 +38,13 @@ function QuickAction({ t, icon: Icon, label, color, onClick }) {
 }
 
 function RecentLoanCard({ t, loan }) {
+  const customerName = loan.customer?.name || loan.customerName || 'Unknown';
+  const area = loan.customer?.area || loan.area || '';
+  const initials = customerName.split(' ').map(n => n[0]).join('').slice(0, 2);
+
+  // Capitalize status to match frontend Stamp badge
+  const displayStatus = loan.status ? loan.status.charAt(0).toUpperCase() + loan.status.slice(1) : 'Pending';
+
   return (
     <div
       className="flex items-center gap-3 rounded-2xl p-4"
@@ -52,16 +63,16 @@ function RecentLoanCard({ t, loan }) {
           color: t.primary,
         }}
       >
-        {loan.customerName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+        {initials}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div style={{ fontWeight: 600, fontSize: '0.88rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {loan.customerName}
+          {customerName}
         </div>
         <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 1 }}>
-          {loan.type} · {loan.area}
+          {loan.type} · {area}
         </div>
       </div>
 
@@ -77,18 +88,100 @@ function RecentLoanCard({ t, loan }) {
         >
           {formatRs(loan.balance)}
         </span>
-        <Stamp t={t} status={loan.status} />
+        <Stamp t={t} status={displayStatus} />
       </div>
     </div>
   );
 }
 
-export default function DashboardScreen({ t, loans, onNavigate, onToggleTheme, onOpenSettings }) {
-  const totalLoans = loans.length;
-  const activeLoans = loans.filter(l => l.status === 'Active').length;
-  const overdueCount = loans.filter(l => l.status === 'Overdue').length;
-  const todayTotal = loans.filter(l => l.status === 'Active').reduce((s, l) => s + Math.round(l.balance * 0.05), 0);
-  const recentLoans = [...loans].reverse().slice(0, 5);
+export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSettings }) {
+  const [summary, setSummary] = useState(null);
+  const [recentLoans, setRecentLoans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [summaryRes, loansRes] = await Promise.all([
+        getReportSummary(),
+        getLoans()
+      ]);
+
+      if (summaryRes && summaryRes.success) {
+        setSummary(summaryRes.data);
+      }
+      if (loansRes && loansRes.success) {
+        // Slice first 5 loans for recent list
+        setRecentLoans(loansRes.data.slice(0, 5));
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load dashboard data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
+        <TopBar t={t} title="Dashboard" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
+        <div className="flex-1 px-4 py-6 flex flex-col gap-6" style={{ overflowY: 'auto' }}>
+          <div className="animate-pulse flex flex-col gap-3">
+            <div className="h-6 w-32 rounded" style={{ background: t.bgSubtle }} />
+            <div className="h-4 w-48 rounded" style={{ background: t.bgSubtle }} />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="animate-pulse h-28 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="h-5 w-24 rounded" style={{ background: t.bgSubtle }} />
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse h-16 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
+        <TopBar t={t} title="Dashboard" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-3">
+          <AlertCircle size={48} color={t.overdue} />
+          <h3 style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.text }}>Failed to Load Dashboard</h3>
+          <p style={{ fontSize: '0.85rem', color: t.overdue, textAlign: 'center', maxWidth: '80%' }}>{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            style={{
+              marginTop: 12,
+              padding: '8px 16px',
+              background: t.primary,
+              color: t.onPrimary,
+              border: 'none',
+              borderRadius: 10,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { totalLoans = 0, activeLoans = 0, overdueCount = 0, todayCollections = 0 } = summary || {};
 
   return (
     <div
@@ -131,7 +224,7 @@ export default function DashboardScreen({ t, loans, onNavigate, onToggleTheme, o
         >
           <StatCard t={t} label="Total Loans" value={totalLoans} icon={CreditCard} />
           <StatCard t={t} label="Active Loans" value={activeLoans} icon={TrendingUp} iconColor={t.active} />
-          <StatCard t={t} label="Today's Collections" value={todayTotal} icon={HandCoins} isAmount accent />
+          <StatCard t={t} label="Today's Collections" value={todayCollections} icon={HandCoins} isAmount accent />
           <StatCard t={t} label="Overdue Count" value={overdueCount} icon={AlertCircle} iconColor={t.overdue} />
         </div>
 
@@ -166,9 +259,15 @@ export default function DashboardScreen({ t, loans, onNavigate, onToggleTheme, o
           </div>
 
           <div className="flex flex-col gap-3">
-            {recentLoans.map(loan => (
-              <RecentLoanCard key={loan.id} t={t} loan={loan} />
-            ))}
+            {recentLoans.length === 0 ? (
+              <div style={{ fontSize: '0.8rem', color: t.textMuted, textAlign: 'center', padding: '16px 0' }}>
+                No recent loans.
+              </div>
+            ) : (
+              recentLoans.map(loan => (
+                <RecentLoanCard key={loan._id} t={t} loan={loan} />
+              ))
+            )}
           </div>
         </div>
 
@@ -209,3 +308,4 @@ function getGreeting() {
   if (h < 17) return 'afternoon';
   return 'evening';
 }
+

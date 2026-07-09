@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { Search, ChevronRight, MapPin, Phone, CreditCard, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, ChevronRight, MapPin, Phone, CreditCard, X, AlertCircle } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
+import { getCustomers, getCustomer } from '../api/client.js';
 
 function CustomerCard({ t, customer, onSelect }) {
   const initials = customer.name.split(' ').map(n => n[0]).join('').slice(0, 2);
   const colors = ['#0E5C52', '#C7912F', '#B5433A', '#3E7A4C', '#6B5CA5', '#2E7D8C'];
-  const color = colors[customer.id.charCodeAt(1) % colors.length];
+  const customerId = customer._id || customer.id || '';
+  const color = colors[customerId.charCodeAt(customerId.length - 1) % colors.length] || colors[0];
 
   return (
     <button
-      onClick={() => onSelect(customer)}
+      onClick={() => onSelect(customerId)}
       className="w-full text-left rounded-2xl p-4 flex items-center gap-4 btn-press"
       style={{
         background: t.card,
@@ -58,7 +60,7 @@ function CustomerCard({ t, customer, onSelect }) {
         <div className="flex items-center gap-1 mt-1">
           <CreditCard size={11} color={t.primary} strokeWidth={2} />
           <span style={{ fontSize: '0.68rem', color: t.primary, fontWeight: 600 }}>
-            {customer.activeLoans} active loan{customer.activeLoans !== 1 ? 's' : ''}
+            {customer.activeLoans || 0} active loan{(customer.activeLoans !== 1) ? 's' : ''}
           </span>
         </div>
       </div>
@@ -68,8 +70,46 @@ function CustomerCard({ t, customer, onSelect }) {
   );
 }
 
-function CustomerDetail({ t, customer, onClose }) {
+function CustomerDetail({ t, customer, onClose, loading }) {
+  if (loading || !customer) {
+    return (
+      <div
+        className="fixed inset-0 flex items-end lg:items-center justify-center"
+        style={{ zIndex: 200, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+        onClick={onClose}
+      >
+        <div
+          className="w-full max-w-md rounded-t-3xl lg:rounded-3xl p-6 animate-pulse"
+          style={{ background: t.card, border: `1px solid ${t.border}` }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <div className="h-5 w-28 rounded" style={{ background: t.bgSubtle }} />
+            <div className="h-6 w-6 rounded" style={{ background: t.bgSubtle }} />
+          </div>
+          <div className="flex flex-col items-center mb-6 gap-3">
+            <div className="h-16 w-16 rounded-full" style={{ background: t.bgSubtle }} />
+            <div className="h-5 w-32 rounded" style={{ background: t.bgSubtle }} />
+            <div className="h-3.5 w-24 rounded" style={{ background: t.bgSubtle }} />
+          </div>
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex justify-between py-2 border-b" style={{ borderColor: t.border }}>
+                <div className="h-4 w-16 rounded" style={{ background: t.bgSubtle }} />
+                <div className="h-4 w-32 rounded" style={{ background: t.bgSubtle }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const initials = customer.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+  const joinDate = customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('en-LK') : 'N/A';
+  const totalLoans = customer.loans?.length || customer.totalLoans || 0;
+  const activeLoans = customer.loans?.filter(l => ['active', 'overdue'].includes(l.status)).length || customer.activeLoans || 0;
+
   return (
     <div
       className="fixed inset-0 flex items-end lg:items-center justify-center"
@@ -114,19 +154,19 @@ function CustomerDetail({ t, customer, onClose }) {
             {customer.name}
           </div>
           <div style={{ fontSize: '0.75rem', color: t.textMuted, marginTop: 2 }}>
-            ID: {customer.id}
+            ID: {customer._id || customer.id}
           </div>
         </div>
 
         {/* Detail rows */}
         {[
           { label: 'Phone',     value: customer.phone },
-          { label: 'NIC',      value: customer.nic },
-          { label: 'Area',     value: customer.area },
-          { label: 'Address',  value: customer.address },
-          { label: 'Member Since', value: customer.joinDate },
-          { label: 'Total Loans',  value: customer.totalLoans },
-          { label: 'Active Loans', value: customer.activeLoans },
+          { label: 'NIC',      value: customer.nic || 'N/A' },
+          { label: 'Area',     value: customer.area || 'N/A' },
+          { label: 'Address',  value: customer.address || 'N/A' },
+          { label: 'Member Since', value: joinDate },
+          { label: 'Total Loans',  value: totalLoans },
+          { label: 'Active Loans', value: activeLoans },
         ].map(({ label, value }) => (
           <div
             key={label}
@@ -144,16 +184,63 @@ function CustomerDetail({ t, customer, onClose }) {
   );
 }
 
-export default function CustomersScreen({ t, customers, onToggleTheme, onOpenSettings }) {
+export default function CustomersScreen({ t, onToggleTheme, onOpenSettings }) {
   const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState(null);
+  const [customersList, setCustomersList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filtered = customers.filter(c =>
-    !search ||
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.area.toLowerCase().includes(search.toLowerCase()) ||
-    c.phone.includes(search)
-  );
+  // Selected customer for modal
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [selectedCustomerDetails, setSelectedCustomerDetails] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await getCustomers(search);
+        if (res && res.success) {
+          setCustomersList(res.data);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to load customers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const delay = setTimeout(() => {
+      fetchCustomers();
+    }, search ? 300 : 0);
+
+    return () => clearTimeout(delay);
+  }, [search]);
+
+  // Load customer details when selected
+  useEffect(() => {
+    if (!selectedCustomerId) {
+      setSelectedCustomerDetails(null);
+      return;
+    }
+
+    const fetchDetails = async () => {
+      setDetailsLoading(true);
+      try {
+        const res = await getCustomer(selectedCustomerId);
+        if (res && res.success) {
+          setSelectedCustomerDetails(res.data);
+        }
+      } catch (err) {
+        console.error('Error fetching customer details:', err);
+      } finally {
+        setDetailsLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [selectedCustomerId]);
 
   return (
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
@@ -179,31 +266,56 @@ export default function CustomersScreen({ t, customers, onToggleTheme, onOpenSet
           )}
         </div>
 
-        {/* Count */}
-        <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12 }}>
-          {filtered.length} customer{filtered.length !== 1 ? 's' : ''} found
-        </div>
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center p-6 gap-2" style={{ color: t.overdue, marginBottom: 12 }}>
+            <AlertCircle size={16} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{error}</span>
+          </div>
+        )}
 
-        {/* Customer list */}
-        <div className="flex flex-col gap-3">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div style={{ fontSize: '2.5rem' }}>👥</div>
-              <div style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.textMuted }}>No customers found</div>
-              <div style={{ fontSize: '0.8rem', color: t.textMuted }}>Try a different search term.</div>
+        {/* Loading / List State */}
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse h-24 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Count */}
+            <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12 }}>
+              {customersList.length} customer{customersList.length !== 1 ? 's' : ''} found
             </div>
-          ) : (
-            filtered.map(c => (
-              <CustomerCard key={c.id} t={t} customer={c} onSelect={setSelected} />
-            ))
-          )}
-        </div>
+
+            {/* Customer list */}
+            <div className="flex flex-col gap-3">
+              {customersList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <div style={{ fontSize: '2.5rem' }}>👥</div>
+                  <div style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.textMuted }}>No customers found</div>
+                  <div style={{ fontSize: '0.8rem', color: t.textMuted }}>Try a different search term.</div>
+                </div>
+              ) : (
+                customersList.map(c => (
+                  <CustomerCard key={c._id || c.id} t={t} customer={c} onSelect={setSelectedCustomerId} />
+                ))
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Customer detail modal */}
-      {selected && (
-        <CustomerDetail t={t} customer={selected} onClose={() => setSelected(null)} />
+      {selectedCustomerId && (
+        <CustomerDetail
+          t={t}
+          customer={selectedCustomerDetails}
+          loading={detailsLoading}
+          onClose={() => setSelectedCustomerId(null)}
+        />
       )}
     </div>
   );
 }
+

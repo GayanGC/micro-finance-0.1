@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Shield, Clock, Briefcase, Plus, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Clock, Briefcase, Plus, Search, AlertCircle } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import Stamp from '../components/Stamp.jsx';
 import { formatRs } from '../theme.js';
+import { getLoans } from '../api/client.js';
 
 const FILTER_OPTIONS = [
   { key: 'All',       label: 'All Loans',  Icon: null },
@@ -12,7 +13,13 @@ const FILTER_OPTIONS = [
 ];
 
 function LoanCard({ t, loan }) {
-  const isOverdue = loan.status === 'Overdue';
+  const isOverdue = loan.status?.toLowerCase() === 'overdue';
+  const customerName = loan.customer?.name || loan.customerName || 'Unknown';
+  const area = loan.customer?.area || loan.area || '';
+  const loanId = loan._id || loan.id || '';
+  const formattedDueDate = loan.dueDate ? new Date(loan.dueDate).toISOString().split('T')[0] : 'N/A';
+  const displayStatus = loan.status ? loan.status.charAt(0).toUpperCase() + loan.status.slice(1) : 'Pending';
+
   return (
     <div
       className="rounded-2xl p-4 flex flex-col gap-3"
@@ -26,13 +33,13 @@ function LoanCard({ t, loan }) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div style={{ fontWeight: 700, fontSize: '0.92rem', color: t.text, fontFamily: 'Poppins' }}>
-            {loan.customerName}
+            {customerName}
           </div>
           <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 2 }}>
-            {loan.area} · ID: {loan.id}
+            {area} · ID: {loanId}
           </div>
         </div>
-        <Stamp t={t} status={loan.status} />
+        <Stamp t={t} status={displayStatus} />
       </div>
 
       {/* Divider */}
@@ -53,7 +60,7 @@ function LoanCard({ t, loan }) {
             Due Date
           </span>
           <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isOverdue ? t.overdue : t.text }}>
-            {loan.dueDate}
+            {formattedDueDate}
           </span>
         </div>
         <div className="flex flex-col gap-0.5 items-end">
@@ -76,14 +83,38 @@ function LoanCard({ t, loan }) {
   );
 }
 
-export default function LoansScreen({ t, loans, onNavigate, onToggleTheme, onOpenSettings }) {
+export default function LoansScreen({ t, onNavigate, onToggleTheme, onOpenSettings }) {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [loansList, setLoansList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filtered = loans.filter(l => {
-    const matchType = filter === 'All' || l.type === filter;
-    const matchSearch = !search || l.customerName.toLowerCase().includes(search.toLowerCase()) || l.id.toLowerCase().includes(search.toLowerCase());
-    return matchType && matchSearch;
+  const fetchLoans = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await getLoans({ type: filter });
+      if (res && res.success) {
+        setLoansList(res.data);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch loans');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoans();
+  }, [filter]);
+
+  const filtered = loansList.filter(l => {
+    const customerName = l.customer?.name || l.customerName || '';
+    const loanId = l._id || l.id || '';
+    return !search ||
+      customerName.toLowerCase().includes(search.toLowerCase()) ||
+      loanId.toLowerCase().includes(search.toLowerCase());
   });
 
   return (
@@ -144,23 +175,42 @@ export default function LoansScreen({ t, loans, onNavigate, onToggleTheme, onOpe
           })}
         </div>
 
-        {/* Count */}
-        <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12 }}>
-          {filtered.length} loan{filtered.length !== 1 ? 's' : ''} found
-        </div>
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center p-6 gap-2" style={{ color: t.overdue }}>
+            <AlertCircle size={16} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{error}</span>
+          </div>
+        )}
 
-        {/* Loan list */}
-        <div className="flex flex-col gap-3">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div style={{ fontSize: '2.5rem' }}>📋</div>
-              <div style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.textMuted }}>No loans found</div>
-              <div style={{ fontSize: '0.8rem', color: t.textMuted }}>Try a different filter or search term.</div>
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse h-32 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Count */}
+            <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12 }}>
+              {filtered.length} loan{filtered.length !== 1 ? 's' : ''} found
             </div>
-          ) : (
-            filtered.map(loan => <LoanCard key={loan.id} t={t} loan={loan} />)
-          )}
-        </div>
+
+            {/* Loan list */}
+            <div className="flex flex-col gap-3">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <div style={{ fontSize: '2.5rem' }}>📋</div>
+                  <div style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.textMuted }}>No loans found</div>
+                  <div style={{ fontSize: '0.8rem', color: t.textMuted }}>Try a different filter or search term.</div>
+                </div>
+              ) : (
+                filtered.map(loan => <LoanCard key={loan._id} t={t} loan={loan} />)
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* FAB — New Loan */}
@@ -208,3 +258,4 @@ export default function LoansScreen({ t, loans, onNavigate, onToggleTheme, onOpe
     </div>
   );
 }
+

@@ -1,8 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { LIGHT, DARK } from './theme.js';
-import { initialLoans } from './data/mockLoans.js';
-import { initialCustomers } from './data/mockCustomers.js';
-import { initialTodayCollections, monthlyCollections, loanTypeBreakdown } from './data/mockCollections.js';
+import { AuthContext } from './context/AuthContext.jsx';
 
 // Screens
 import LoginScreen from './screens/LoginScreen.jsx';
@@ -21,8 +19,6 @@ import Sidebar from './components/Sidebar.jsx';
 // Main nav tabs
 const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports'];
 
-let loanIdCounter = 13; // starts after mock data
-
 export default function App() {
   // ── Theme ──────────────────────────────────────────────────────────
   const [themeMode, setThemeMode] = useState('light');
@@ -32,7 +28,7 @@ export default function App() {
   }
 
   // ── Auth ──────────────────────────────────────────────────────────
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { isAuthenticated, loading: authLoading, logout } = useContext(AuthContext);
 
   // ── Screen navigation ─────────────────────────────────────────────
   const [currentScreen, setCurrentScreen] = useState('dashboard');
@@ -58,42 +54,31 @@ export default function App() {
     }
   }
 
-  // ── State: Loans ──────────────────────────────────────────────────
-  const [loans, setLoans] = useState(initialLoans);
-
-  function addLoan(loanData) {
-    const id = `L${String(loanIdCounter++).padStart(3, '0')}`;
-    setLoans(prev => [{ id, customerId: 'C_NEW', ...loanData }, ...prev]);
-  }
-
-  // ── State: Collections ────────────────────────────────────────────
-  const [collections, setCollections] = useState(initialTodayCollections);
-
-  function collectPayment(id) {
-    setCollections(prev =>
-      prev.map(c => c.id === id ? { ...c, paid: true, justPaid: true } : c)
-    );
-  }
-
-  // ── Derived nav ───────────────────────────────────────────────────
   const activeTab = MAIN_SCREENS.includes(currentScreen) ? currentScreen : screenStack[0] || 'dashboard';
   const isSubScreen = currentScreen === 'newloan' || currentScreen === 'settings';
 
-  // ── Handlers ──────────────────────────────────────────────────────
-  function handleLogout() {
-    setLoggedIn(false);
-    setCurrentScreen('dashboard');
-    setScreenStack([]);
+  // ── Loading state for token verification ──────────────────────────
+  if (authLoading) {
+    return (
+      <div
+        className="flex items-center justify-center min-h-screen theme-transition"
+        style={{ background: t.bg }}
+      >
+        <div className="animate-pulse" style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.primary }}>
+          Loading MicroFinance...
+        </div>
+      </div>
+    );
   }
 
   // ── Login gate ────────────────────────────────────────────────────
-  if (!loggedIn) {
+  if (!isAuthenticated) {
     return (
       <div
         className="theme-transition"
         style={{ minHeight: '100vh', background: t.bg }}
       >
-        <LoginScreen t={t} onLogin={() => setLoggedIn(true)} />
+        <LoginScreen t={t} />
       </div>
     );
   }
@@ -123,7 +108,6 @@ export default function App() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          // On desktop, offset for sidebar
         }}
         className="lg:ml-60"
       >
@@ -131,7 +115,6 @@ export default function App() {
         {currentScreen === 'dashboard' && (
           <DashboardScreen
             t={t}
-            loans={loans}
             onNavigate={navigate}
             onToggleTheme={toggleTheme}
             onOpenSettings={() => navigate('settings')}
@@ -141,7 +124,6 @@ export default function App() {
         {currentScreen === 'loans' && (
           <LoansScreen
             t={t}
-            loans={loans}
             onNavigate={navigate}
             onToggleTheme={toggleTheme}
             onOpenSettings={() => navigate('settings')}
@@ -152,7 +134,6 @@ export default function App() {
           <NewLoanScreen
             t={t}
             onBack={goBack}
-            onSubmit={addLoan}
             onToggleTheme={toggleTheme}
           />
         )}
@@ -160,8 +141,6 @@ export default function App() {
         {currentScreen === 'collection' && (
           <CollectionScreen
             t={t}
-            collections={collections}
-            onCollect={collectPayment}
             onToggleTheme={toggleTheme}
             onOpenSettings={() => navigate('settings')}
           />
@@ -170,7 +149,6 @@ export default function App() {
         {currentScreen === 'customers' && (
           <CustomersScreen
             t={t}
-            customers={initialCustomers}
             onToggleTheme={toggleTheme}
             onOpenSettings={() => navigate('settings')}
           />
@@ -179,8 +157,6 @@ export default function App() {
         {currentScreen === 'reports' && (
           <ReportsScreen
             t={t}
-            monthlyCollections={monthlyCollections}
-            loanTypeBreakdown={loanTypeBreakdown}
             onToggleTheme={toggleTheme}
             onOpenSettings={() => navigate('settings')}
           />
@@ -190,7 +166,7 @@ export default function App() {
           <SettingsScreen
             t={t}
             onToggleTheme={toggleTheme}
-            onLogout={handleLogout}
+            onLogout={logout}
             onBack={goBack}
           />
         )}
@@ -207,3 +183,4 @@ export default function App() {
     </div>
   );
 }
+

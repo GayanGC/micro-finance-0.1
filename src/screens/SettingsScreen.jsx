@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Sun, Moon, Globe, Lock, LogOut, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useState, useContext } from 'react';
+import { Sun, Moon, Globe, Lock, LogOut, ChevronRight } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
+import { AuthContext } from '../context/AuthContext.jsx';
 
 function SettingRow({ t, icon: Icon, label, subtitle, right, onClick, danger }) {
   return (
@@ -75,7 +76,12 @@ function Toggle({ t, value, onChange }) {
 }
 
 export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
-  const [pinModalOpen, setPinModalOpen] = useState(false);
+  const { user } = useContext(AuthContext);
+  const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AG';
+  const displayName = user?.name || 'Agent';
+  const roleDisplay = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Agent';
+  const branchDisplay = user?.branch || 'General Branch';
+  const agentIdDisplay = user?.id || user?._id || 'AG-0000';
 
   return (
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
@@ -105,7 +111,7 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
               }}
             >
               <span style={{ fontFamily: 'Poppins', fontWeight: 800, fontSize: '1.4rem', color: '#fff' }}>
-                AK
+                {initials}
               </span>
               {/* Online dot */}
               <div
@@ -124,10 +130,10 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
 
             <div className="flex-1 min-w-0">
               <div style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '1rem', color: t.text }}>
-                Amal Kumara
+                {displayName}
               </div>
               <div style={{ fontSize: '0.75rem', color: t.textMuted, marginTop: 2 }}>
-                Field Agent · Colombo Branch
+                {roleDisplay} · {branchDisplay}
               </div>
               <div
                 style={{
@@ -142,7 +148,7 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
                   letterSpacing: '0.05em',
                 }}
               >
-                AGENT ID: AG-0042
+                AGENT ID: {agentIdDisplay}
               </div>
             </div>
           </div>
@@ -217,3 +223,4 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
     </div>
   );
 }
+

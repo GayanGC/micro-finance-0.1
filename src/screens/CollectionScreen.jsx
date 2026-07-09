@@ -1,18 +1,20 @@
-import { useState } from 'react';
-import { CheckCircle, MapPin, PartyPopper } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, MapPin, PartyPopper, AlertCircle } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import Stamp from '../components/Stamp.jsx';
 import { formatRs } from '../theme.js';
+import { getTodayPayments, recordPayment } from '../api/client.js';
 
 function CollectionRow({ t, item, onCollect }) {
+  const isPaid = item.paidToday;
   return (
     <div
       className="flex items-center gap-4 rounded-2xl p-4"
       style={{
         background: t.card,
-        border: `1px solid ${item.paid ? t.border : t.border}`,
+        border: `1px solid ${isPaid ? t.border : t.border}`,
         boxShadow: t.shadow,
-        opacity: item.paid ? 0.75 : 1,
+        opacity: isPaid ? 0.75 : 1,
         transition: 'opacity 0.3s',
       }}
     >
@@ -22,11 +24,11 @@ function CollectionRow({ t, item, onCollect }) {
         style={{
           width: 44,
           height: 44,
-          background: item.paid ? `${t.paid}18` : t.primarySoft,
+          background: isPaid ? `${t.paid}18` : t.primarySoft,
           fontFamily: 'Poppins',
           fontWeight: 700,
           fontSize: '0.85rem',
-          color: item.paid ? t.paid : t.primary,
+          color: isPaid ? t.paid : t.primary,
         }}
       >
         {item.customerName.split(' ').map(n => n[0]).join('').slice(0, 2)}
@@ -40,7 +42,7 @@ function CollectionRow({ t, item, onCollect }) {
             fontSize: '0.9rem',
             color: t.text,
             fontFamily: 'Poppins',
-            textDecoration: item.paid ? 'line-through' : 'none',
+            textDecoration: isPaid ? 'line-through' : 'none',
           }}
         >
           {item.customerName}
@@ -54,7 +56,7 @@ function CollectionRow({ t, item, onCollect }) {
             fontFamily: "'IBM Plex Mono', monospace",
             fontWeight: 600,
             fontSize: '0.85rem',
-            color: item.paid ? t.paid : t.accent,
+            color: isPaid ? t.paid : t.accent,
             marginTop: 3,
           }}
         >
@@ -64,13 +66,13 @@ function CollectionRow({ t, item, onCollect }) {
 
       {/* Action */}
       <div className="flex-shrink-0">
-        {item.paid ? (
+        {isPaid ? (
           <div className={item.justPaid ? 'stamp-pop' : ''}>
             <Stamp t={t} status="Paid" />
           </div>
         ) : (
           <button
-            onClick={() => onCollect(item.id)}
+            onClick={() => onCollect(item.loanId, item.amountDue)}
             className="flex items-center gap-2 rounded-xl btn-press"
             style={{
               background: t.primary,
@@ -93,13 +95,58 @@ function CollectionRow({ t, item, onCollect }) {
   );
 }
 
-export default function CollectionScreen({ t, collections, onCollect, onToggleTheme, onOpenSettings }) {
-  const total = collections.length;
-  const paidCount = collections.filter(c => c.paid).length;
+export default function CollectionScreen({ t, onToggleTheme, onOpenSettings }) {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchCollections = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await getTodayPayments();
+      if (res && res.success) {
+        setList(res.data);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch collections');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  const handleCollect = async (loanId, amountDue) => {
+    // Optimistic UI update
+    setList(prev => prev.map(item =>
+      item.loanId === loanId ? { ...item, paidToday: true, justPaid: true } : item
+    ));
+
+    try {
+      await recordPayment({ loanId, amount: amountDue });
+      // Refetch from backend to verify and sync
+      const res = await getTodayPayments();
+      if (res && res.success) {
+        setList(res.data);
+      }
+    } catch (err) {
+      // Revert optimistic update on error
+      setList(prev => prev.map(item =>
+        item.loanId === loanId ? { ...item, paidToday: false, justPaid: false } : item
+      ));
+      alert(err.message || 'Failed to record payment');
+    }
+  };
+
+  const total = list.length;
+  const paidCount = list.filter(c => c.paidToday).length;
   const pendingCount = total - paidCount;
-  const totalAmount = collections.reduce((s, c) => s + c.amountDue, 0);
-  const collectedAmount = collections.filter(c => c.paid).reduce((s, c) => s + c.amountDue, 0);
-  const allDone = pendingCount === 0;
+  const totalAmount = list.reduce((s, c) => s + c.amountDue, 0);
+  const collectedAmount = list.filter(c => c.paidToday).reduce((s, c) => s + c.amountDue, 0);
+  const allDone = total > 0 && pendingCount === 0;
 
   return (
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
@@ -171,43 +218,67 @@ export default function CollectionScreen({ t, collections, onCollect, onToggleTh
           </div>
         </div>
 
-        {/* All done state */}
-        {allDone ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div style={{ fontSize: '3rem' }}>🎉</div>
-            <PartyPopper size={40} color={t.paid} strokeWidth={1.5} />
-            <div style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '1.1rem', color: t.paid }}>
-              All collections done!
-            </div>
-            <div style={{ fontSize: '0.8rem', color: t.textMuted, textAlign: 'center' }}>
-              Great work today. All {total} payments have been collected.
-            </div>
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center p-6 gap-2" style={{ color: t.overdue, marginBottom: 12 }}>
+            <AlertCircle size={16} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{error}</span>
+          </div>
+        )}
+
+        {/* Loading / List State */}
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="animate-pulse h-24 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
+            ))}
           </div>
         ) : (
           <>
-            {/* Pending header */}
-            <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {pendingCount} Pending
-            </div>
-
-            {/* Pending rows */}
-            <div className="flex flex-col gap-3 mb-5">
-              {collections.filter(c => !c.paid).map(item => (
-                <CollectionRow key={item.id} t={t} item={item} onCollect={onCollect} />
-              ))}
-            </div>
-
-            {/* Paid rows */}
-            {paidCount > 0 && (
-              <>
-                <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  {paidCount} Collected
+            {allDone ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-4">
+                <div style={{ fontSize: '3rem' }}>🎉</div>
+                <PartyPopper size={40} color={t.paid} strokeWidth={1.5} />
+                <div style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '1.1rem', color: t.paid }}>
+                  All collections done!
                 </div>
-                <div className="flex flex-col gap-3">
-                  {collections.filter(c => c.paid).map(item => (
-                    <CollectionRow key={item.id} t={t} item={item} onCollect={onCollect} />
+                <div style={{ fontSize: '0.8rem', color: t.textMuted, textAlign: 'center' }}>
+                  Great work today. All {total} payments have been collected.
+                </div>
+              </div>
+            ) : total === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div style={{ fontSize: '2.5rem' }}>📋</div>
+                <div style={{ fontFamily: 'Poppins', fontWeight: 700, color: t.textMuted }}>No Collections Today</div>
+                <div style={{ fontSize: '0.8rem', color: t.textMuted }}>There are no loans scheduled for collection today.</div>
+              </div>
+            ) : (
+              <>
+                {/* Pending header */}
+                <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {pendingCount} Pending
+                </div>
+
+                {/* Pending rows */}
+                <div className="flex flex-col gap-3 mb-5">
+                  {list.filter(c => !c.paidToday).map(item => (
+                    <CollectionRow key={item.loanId} t={t} item={item} onCollect={handleCollect} />
                   ))}
                 </div>
+
+                {/* Paid rows */}
+                {paidCount > 0 && (
+                  <>
+                    <div style={{ fontSize: '0.72rem', color: t.textMuted, fontWeight: 500, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      {paidCount} Collected
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {list.filter(c => c.paidToday).map(item => (
+                        <CollectionRow key={item.loanId} t={t} item={item} onCollect={handleCollect} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
           </>
@@ -216,3 +287,4 @@ export default function CollectionScreen({ t, collections, onCollect, onToggleTh
     </div>
   );
 }
+
