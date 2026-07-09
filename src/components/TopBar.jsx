@@ -74,7 +74,7 @@ export default function TopBar({ t, title, onBack, onToggleTheme, onOpenSettings
                 height: 14,
                 borderRadius: '50%',
                 background: t.overdue,
-                color: '#fff',
+                color: t.onPrimary,
                 fontSize: '0.55rem',
                 fontWeight: 700,
               }}

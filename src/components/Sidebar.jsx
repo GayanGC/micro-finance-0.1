@@ -13,9 +13,9 @@ const NAV_ITEMS = [
 export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
   return (
     <aside
-      className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0"
+      className="hidden lg:flex flex-col sticky top-0 h-screen flex-shrink-0"
       style={{
-        width: 240,
+        width: 224,
         background: t.card,
         borderRight: `1px solid ${t.border}`,
         zIndex: 40,
@@ -91,26 +91,59 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
       </nav>
 
       {/* Bottom: theme toggle */}
-      <div style={{ padding: '12px 16px', borderTop: `1px solid ${t.border}` }}>
+      <div style={{ padding: '12px 12px', borderTop: `1px solid ${t.border}` }} className="px-3">
         <button
           onClick={onToggleTheme}
-          className="flex items-center gap-3 rounded-xl w-full btn-press"
+          className="flex items-center gap-3 rounded-xl btn-press w-full text-left font-sans"
           style={{
             padding: '10px 14px',
-            background: t.primarySoft,
-            border: 'none',
+            background: 'transparent',
+            border: '1.5px solid transparent',
             cursor: 'pointer',
+            transition: 'background 0.18s, border-color 0.18s',
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = t.bgSubtle; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
         >
           {t.mode === 'light'
-            ? <Moon size={16} color={t.primary} strokeWidth={2} />
-            : <Sun size={16} color={t.primary} strokeWidth={2} />
+            ? <Moon size={18} color={t.textMuted} strokeWidth={1.8} />
+            : <Sun size={18} color={t.textMuted} strokeWidth={1.8} />
           }
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: t.primary }}>
+          <span style={{
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            color: t.text,
+          }}>
             {t.mode === 'light' ? 'Dark Mode' : 'Light Mode'}
           </span>
+          {/* Custom Toggle Switch */}
+          <div
+            style={{
+              marginLeft: 'auto',
+              width: 32,
+              height: 18,
+              borderRadius: 99,
+              background: t.mode === 'dark' ? t.primary : t.border,
+              position: 'relative',
+              padding: 2,
+              transition: 'background 0.2s',
+            }}
+          >
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: '50%',
+                background: '#fff',
+                position: 'absolute',
+                left: t.mode === 'dark' ? 16 : 2,
+                top: 2,
+                transition: 'left 0.2s',
+              }}
+            />
+          </div>
         </button>
-        <div style={{ marginTop: 8, textAlign: 'center', fontSize: '0.6rem', color: t.textMuted }}>
+        <div style={{ marginTop: 12, marginBottom: 4, textAlign: 'center', fontSize: '0.65rem', color: t.textMuted, fontWeight: 500 }}>
           v0.1 — Field Agent Build
         </div>
       </div>

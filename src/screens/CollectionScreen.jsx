@@ -7,65 +7,69 @@ import { getTodayPayments, recordPayment } from '../api/client.js';
 
 function CollectionRow({ t, item, onCollect }) {
   const isPaid = item.paidToday;
+  const initials = item.customerName.split(' ').map(n => n[0]).join('').slice(0, 2);
   return (
     <div
-      className="flex items-center gap-4 rounded-2xl p-4"
+      className="flex items-center justify-between gap-4 rounded-2xl p-3.5"
       style={{
         background: t.card,
-        border: `1px solid ${isPaid ? t.border : t.border}`,
+        border: `1px solid ${t.border}`,
         boxShadow: t.shadow,
         opacity: isPaid ? 0.75 : 1,
         transition: 'opacity 0.3s',
       }}
     >
-      {/* Avatar */}
-      <div
-        className="flex-shrink-0 flex items-center justify-center rounded-full"
-        style={{
-          width: 44,
-          height: 44,
-          background: isPaid ? `${t.paid}18` : t.primarySoft,
-          fontFamily: 'Poppins',
-          fontWeight: 700,
-          fontSize: '0.85rem',
-          color: isPaid ? t.paid : t.primary,
-        }}
-      >
-        {item.customerName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
+      {/* Left group */}
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Avatar */}
         <div
+          className="flex-shrink-0 flex items-center justify-center rounded-full"
           style={{
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            color: t.text,
+            width: 42,
+            height: 42,
+            background: isPaid ? `${t.paid}18` : t.primarySoft,
             fontFamily: 'Poppins',
-            textDecoration: isPaid ? 'line-through' : 'none',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            color: isPaid ? t.paid : t.primary,
           }}
         >
-          {item.customerName}
+          {initials}
         </div>
-        <div className="flex items-center gap-1 mt-0.5">
-          <MapPin size={11} color={t.textMuted} strokeWidth={2} />
-          <span style={{ fontSize: '0.7rem', color: t.textMuted }}>{item.area}</span>
+
+        {/* Info */}
+        <div className="min-w-0">
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              color: t.text,
+              fontFamily: 'Poppins',
+              textDecoration: isPaid ? 'line-through' : 'none',
+            }}
+            className="truncate"
+          >
+            {item.customerName}
+          </div>
+          <div className="flex items-center gap-1 mt-0.5 min-w-0">
+            <MapPin size={11} color={t.textMuted} strokeWidth={2} />
+            <span style={{ fontSize: '0.7rem', color: t.textMuted }} className="truncate">{item.area}</span>
+          </div>
         </div>
-        <div
+      </div>
+
+      {/* Right group */}
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
             fontWeight: 600,
-            fontSize: '0.85rem',
+            fontSize: '0.88rem',
             color: isPaid ? t.paid : t.accent,
-            marginTop: 3,
           }}
         >
           {formatRs(item.amountDue)}
-        </div>
-      </div>
-
-      {/* Action */}
-      <div className="flex-shrink-0">
+        </span>
         {isPaid ? (
           <div className={item.justPaid ? 'stamp-pop' : ''}>
             <Stamp t={t} status="Paid" />
@@ -78,15 +82,15 @@ function CollectionRow({ t, item, onCollect }) {
               background: t.primary,
               color: t.onPrimary,
               border: 'none',
-              padding: '10px 16px',
+              padding: '6px 12px',
               fontWeight: 700,
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               cursor: 'pointer',
               boxShadow: `0 3px 12px ${t.primary}44`,
               whiteSpace: 'nowrap',
             }}
           >
-            <CheckCircle size={15} strokeWidth={2.5} />
+            <CheckCircle size={13} strokeWidth={2.5} />
             Collect
           </button>
         )}
@@ -152,7 +156,8 @@ export default function CollectionScreen({ t, onToggleTheme, onOpenSettings }) {
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
       <TopBar t={t} title="Daily Collection" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
 
-      <div className="flex-1 px-4 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+      <div className="flex-1 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+        <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
 
         {/* Progress summary card */}
         <div
@@ -283,6 +288,7 @@ export default function CollectionScreen({ t, onToggleTheme, onOpenSettings }) {
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   );

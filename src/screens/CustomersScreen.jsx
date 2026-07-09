@@ -12,7 +12,7 @@ function CustomerCard({ t, customer, onSelect }) {
   return (
     <button
       onClick={() => onSelect(customerId)}
-      className="w-full text-left rounded-2xl p-4 flex items-center gap-4 btn-press"
+      className="w-full text-left rounded-2xl p-3.5 flex items-center gap-4 btn-press"
       style={{
         background: t.card,
         border: `1px solid ${t.border}`,
@@ -42,7 +42,7 @@ function CustomerCard({ t, customer, onSelect }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: t.text, fontFamily: 'Poppins' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: t.text, fontFamily: 'Poppins' }} className="truncate">
           {customer.name}
         </div>
         <div className="flex items-center gap-3 mt-1">
@@ -52,9 +52,9 @@ function CustomerCard({ t, customer, onSelect }) {
               {customer.phone}
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 min-w-0">
             <MapPin size={11} color={t.textMuted} strokeWidth={2} />
-            <span style={{ fontSize: '0.7rem', color: t.textMuted }}>{customer.area}</span>
+            <span style={{ fontSize: '0.7rem', color: t.textMuted }} className="truncate">{customer.area}</span>
           </div>
         </div>
         <div className="flex items-center gap-1 mt-1">
@@ -246,12 +246,13 @@ export default function CustomersScreen({ t, onToggleTheme, onOpenSettings }) {
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
       <TopBar t={t} title="Customers" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
 
-      <div className="flex-1 px-4 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
-        {/* Search bar */}
-        <div
-          className="flex items-center gap-3 rounded-2xl px-4 mb-5"
-          style={{ background: t.card, border: `1.5px solid ${t.border}`, height: 52 }}
-        >
+      <div className="flex-1 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+        <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
+          {/* Search bar */}
+          <div
+            className="flex items-center gap-3 rounded-2xl px-4 mb-5"
+            style={{ background: t.card, border: `1.5px solid ${t.border}`, height: 52 }}
+          >
           <Search size={16} color={t.textMuted} strokeWidth={2} />
           <input
             placeholder="Search name, phone, or area…"
@@ -304,6 +305,7 @@ export default function CustomersScreen({ t, onToggleTheme, onOpenSettings }) {
             </div>
           </>
         )}
+        </div>
       </div>
 
       {/* Customer detail modal */}

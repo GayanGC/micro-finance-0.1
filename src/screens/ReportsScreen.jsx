@@ -43,21 +43,26 @@ function PieTooltip({ active, payload, t }) {
   );
 }
 
-const RADIAN = Math.PI / 180;
-function CustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }) {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  return (
-    <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700}>
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
-}
-
-
-
 export default function ReportsScreen({ t, onToggleTheme, onOpenSettings }) {
+  const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill={t.mode === 'dark' ? '#0E1614' : '#FFFFFF'}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={11}
+        fontWeight={700}
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
   const [summary, setSummary] = useState(null);
   const [trend, setTrend] = useState([]);
   const [breakdown, setBreakdown] = useState([]);
@@ -149,7 +154,8 @@ export default function ReportsScreen({ t, onToggleTheme, onOpenSettings }) {
     <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
       <TopBar t={t} title="Reports" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
 
-      <div className="flex-1 px-4 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+      <div className="flex-1 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+        <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
 
         {/* Summary row */}
         <div className="flex gap-3 mb-5">
@@ -291,6 +297,7 @@ export default function ReportsScreen({ t, onToggleTheme, onOpenSettings }) {
           </div>
         </div>
 
+        </div>
       </div>
     </div>
   );

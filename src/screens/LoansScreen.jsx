@@ -19,65 +19,58 @@ function LoanCard({ t, loan }) {
   const loanId = loan._id || loan.id || '';
   const formattedDueDate = loan.dueDate ? new Date(loan.dueDate).toISOString().split('T')[0] : 'N/A';
   const displayStatus = loan.status ? loan.status.charAt(0).toUpperCase() + loan.status.slice(1) : 'Pending';
+  const initials = customerName.split(' ').map(n => n[0]).join('').slice(0, 2);
 
   return (
     <div
-      className="rounded-2xl p-4 flex flex-col gap-3"
+      className="flex items-center justify-between gap-4 rounded-2xl p-3.5"
       style={{
         background: t.card,
         border: `1px solid ${isOverdue ? t.overdue + '44' : t.border}`,
         boxShadow: t.shadow,
       }}
     >
-      {/* Top row */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div style={{ fontWeight: 700, fontSize: '0.92rem', color: t.text, fontFamily: 'Poppins' }}>
+      {/* Left group */}
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Avatar */}
+        <div
+          className="flex-shrink-0 flex items-center justify-center rounded-full"
+          style={{
+            width: 42,
+            height: 42,
+            background: t.primarySoft,
+            fontFamily: 'Poppins',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            color: t.primary,
+          }}
+        >
+          {initials}
+        </div>
+        {/* Info */}
+        <div className="min-w-0">
+          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: t.text, fontFamily: 'Poppins' }} className="truncate">
             {customerName}
           </div>
-          <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 2 }}>
-            {area} · ID: {loanId}
+          <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 2 }} className="truncate">
+            {loan.type} · {area} · Due: {formattedDueDate}
           </div>
         </div>
-        <Stamp t={t} status={displayStatus} />
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: t.border }} />
-
-      {/* Details row */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span style={{ fontSize: '0.65rem', color: t.textMuted, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Type
-          </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: t.text }}>
-            {loan.type}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5 items-center">
-          <span style={{ fontSize: '0.65rem', color: t.textMuted, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Due Date
-          </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: isOverdue ? t.overdue : t.text }}>
-            {formattedDueDate}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5 items-end">
-          <span style={{ fontSize: '0.65rem', color: t.textMuted, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Balance
-          </span>
-          <span
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontWeight: 600,
-              fontSize: '0.88rem',
-              color: loan.balance === 0 ? t.paid : t.text,
-            }}
-          >
-            {loan.balance === 0 ? 'Cleared' : formatRs(loan.balance)}
-          </span>
-        </div>
+      {/* Right group */}
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <span
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontWeight: 600,
+            fontSize: '0.88rem',
+            color: loan.balance === 0 ? t.paid : t.text,
+          }}
+        >
+          {loan.balance === 0 ? 'Cleared' : formatRs(loan.balance)}
+        </span>
+        <Stamp t={t} status={displayStatus} />
       </div>
     </div>
   );
@@ -126,12 +119,13 @@ export default function LoansScreen({ t, onNavigate, onToggleTheme, onOpenSettin
         onOpenSettings={onOpenSettings}
       />
 
-      <div className="flex-1 px-4 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
-        {/* Search */}
-        <div
-          className="flex items-center gap-3 rounded-2xl px-4 mb-4"
-          style={{ background: t.card, border: `1.5px solid ${t.border}`, height: 48 }}
-        >
+      <div className="flex-1 pb-24 lg:pb-8" style={{ overflowY: 'auto', paddingTop: 16 }}>
+        <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
+          {/* Search */}
+          <div
+            className="flex items-center gap-3 rounded-2xl px-4 mb-4"
+            style={{ background: t.card, border: `1.5px solid ${t.border}`, height: 48 }}
+          >
           <Search size={16} color={t.textMuted} strokeWidth={2} />
           <input
             placeholder="Search loans or customer…"
@@ -211,6 +205,7 @@ export default function LoansScreen({ t, onNavigate, onToggleTheme, onOpenSettin
             </div>
           </>
         )}
+        </div>
       </div>
 
       {/* FAB — New Loan */}

@@ -108,8 +108,9 @@ export default function App() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
+          minWidth: 0,
         }}
-        className="lg:ml-60"
+        className="w-full overflow-x-hidden"
       >
         {/* Screen router */}
         {currentScreen === 'dashboard' && (

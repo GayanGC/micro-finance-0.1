@@ -47,37 +47,40 @@ function RecentLoanCard({ t, loan }) {
 
   return (
     <div
-      className="flex items-center gap-3 rounded-2xl p-4"
+      className="flex items-center justify-between gap-4 rounded-2xl p-3.5"
       style={{ background: t.card, border: `1px solid ${t.border}`, boxShadow: t.shadow }}
     >
-      {/* Avatar */}
-      <div
-        className="flex-shrink-0 flex items-center justify-center rounded-full"
-        style={{
-          width: 42,
-          height: 42,
-          background: t.primarySoft,
-          fontFamily: 'Poppins',
-          fontWeight: 700,
-          fontSize: '0.85rem',
-          color: t.primary,
-        }}
-      >
-        {initials}
+      {/* Left group */}
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Avatar */}
+        <div
+          className="flex-shrink-0 flex items-center justify-center rounded-full"
+          style={{
+            width: 42,
+            height: 42,
+            background: t.primarySoft,
+            fontFamily: 'Poppins',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            color: t.primary,
+          }}
+        >
+          {initials}
+        </div>
+
+        {/* Info */}
+        <div className="min-w-0">
+          <div style={{ fontWeight: 600, fontSize: '0.88rem', color: t.text, fontFamily: 'Poppins' }} className="truncate">
+            {customerName}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 1 }} className="truncate">
+            {loan.type} · {area}
+          </div>
+        </div>
       </div>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div style={{ fontWeight: 600, fontSize: '0.88rem', color: t.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {customerName}
-        </div>
-        <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 1 }}>
-          {loan.type} · {area}
-        </div>
-      </div>
-
-      {/* Amount + stamp */}
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+      {/* Right group */}
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
@@ -196,16 +199,17 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
       />
 
       <div
-        className="flex-1 px-4 pb-24 lg:pb-8"
+        className="flex-1 pb-24 lg:pb-8"
         style={{ overflowY: 'auto', paddingTop: 20 }}
       >
-        {/* Greeting */}
-        <div className="mb-5">
-          <h2
-            style={{
-              fontFamily: 'Poppins',
-              fontWeight: 700,
-              fontSize: '1.25rem',
+        <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
+          {/* Greeting */}
+          <div className="mb-5">
+            <h2
+              style={{
+                fontFamily: 'Poppins',
+                fontWeight: 700,
+                fontSize: '1.25rem',
               color: t.text,
               lineHeight: 1.2,
             }}
@@ -297,6 +301,7 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

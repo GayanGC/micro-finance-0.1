@@ -42,17 +42,14 @@ function SettingRow({ t, icon: Icon, label, subtitle, right, onClick, danger }) 
 }
 
 // Toggle switch component
-function Toggle({ t, value, onChange }) {
+function Toggle({ t, value }) {
   return (
-    <button
-      onClick={() => onChange(!value)}
+    <div
       style={{
         width: 48,
         height: 26,
         borderRadius: 13,
         background: value ? t.primary : t.border,
-        border: 'none',
-        cursor: 'pointer',
         position: 'relative',
         transition: 'background 0.2s',
         flexShrink: 0,
@@ -71,7 +68,7 @@ function Toggle({ t, value, onChange }) {
           transition: 'left 0.2s',
         }}
       />
-    </button>
+    </div>
   );
 }
 
@@ -110,7 +107,7 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
                 boxShadow: `0 4px 16px ${t.primary}44`,
               }}
             >
-              <span style={{ fontFamily: 'Poppins', fontWeight: 800, fontSize: '1.4rem', color: '#fff' }}>
+              <span style={{ fontFamily: 'Poppins', fontWeight: 800, fontSize: '1.4rem', color: t.onPrimary }}>
                 {initials}
               </span>
               {/* Online dot */}
@@ -166,7 +163,7 @@ export default function SettingsScreen({ t, onToggleTheme, onLogout, onBack }) {
               icon={t.mode === 'light' ? Moon : Sun}
               label="Dark Mode"
               subtitle={t.mode === 'dark' ? 'Currently on' : 'Currently off'}
-              right={<Toggle t={t} value={t.mode === 'dark'} onChange={onToggleTheme} />}
+              right={<Toggle t={t} value={t.mode === 'dark'} />}
               onClick={onToggleTheme}
             />
             <SettingRow
