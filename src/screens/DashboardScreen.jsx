@@ -1,12 +1,13 @@
 
 
-import { useState, useEffect } from 'react';
-import { CreditCard, HandCoins, BarChart2, TrendingUp, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useContext } from 'react';
+import { CreditCard, HandCoins, BarChart2, TrendingUp, AlertCircle, UserCheck, CalendarDays, CalendarOff, Users } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import StatCard from '../components/StatCard.jsx';
 import Stamp from '../components/Stamp.jsx';
 import { formatRs } from '../theme.js';
-import { getReportSummary, getLoans } from '../api/client.js';
+import { getReportSummary, getLoans, getEmployeeStats } from '../api/client.js';
+import { AuthContext } from '../context/AuthContext.jsx';
 
 function QuickAction({ t, icon: Icon, label, color, onClick }) {
   return (
@@ -98,8 +99,11 @@ function RecentLoanCard({ t, loan }) {
 }
 
 export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSettings }) {
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
   const [summary, setSummary] = useState(null);
   const [recentLoans, setRecentLoans] = useState([]);
+  const [hrStats, setHrStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -107,17 +111,20 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
     setLoading(true);
     setError('');
     try {
-      const [summaryRes, loansRes] = await Promise.all([
+      const [summaryRes, loansRes, hrRes] = await Promise.all([
         getReportSummary(),
-        getLoans()
+        getLoans(),
+        isAdmin ? getEmployeeStats() : Promise.resolve(null),
       ]);
 
       if (summaryRes && summaryRes.success) {
         setSummary(summaryRes.data);
       }
       if (loansRes && loansRes.success) {
-        // Slice first 5 loans for recent list
         setRecentLoans(loansRes.data.slice(0, 5));
+      }
+      if (hrRes && hrRes.success) {
+        setHrStats(hrRes.data);
       }
     } catch (err) {
       setError(err.message || 'Failed to load dashboard data.');
@@ -243,8 +250,26 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
             <QuickAction t={t} icon={CreditCard} label="New Loan" color={t.primary} onClick={() => onNavigate('newloan')} />
             <QuickAction t={t} icon={HandCoins} label="Collect Payment" color={t.accent} onClick={() => onNavigate('collection')} />
             <QuickAction t={t} icon={BarChart2} label="Reports" color={t.active} onClick={() => onNavigate('reports')} />
+            <QuickAction t={t} icon={UserCheck} label="Employees" color={'#7C5CBF'} onClick={() => onNavigate('employees')} />
+            <QuickAction t={t} icon={CalendarOff} label="Leave" color={t.accent} onClick={() => onNavigate('leave')} />
           </div>
         </div>
+
+        {/* HR Stats (admin only) */}
+        {isAdmin && hrStats && (
+          <div style={{ marginBottom: 24 }}>
+            <h3
+              style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.88rem', color: t.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}
+            >
+              HR Overview
+            </h3>
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
+              <StatCard t={t} label="Total Employees" value={hrStats.totalEmployees ?? 0} icon={Users} />
+              <StatCard t={t} label="Present Today" value={hrStats.todayPresent ?? 0} icon={CalendarDays} iconColor={t.active} />
+              <StatCard t={t} label="Pending Leaves" value={hrStats.pendingLeaves ?? 0} icon={CalendarOff} iconColor={t.pending} />
+            </div>
+          </div>
+        )}
 
         {/* Recent activity */}
         <div>

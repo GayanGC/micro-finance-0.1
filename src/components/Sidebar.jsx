@@ -1,12 +1,25 @@
-import { Home, CreditCard, HandCoins, Users, BarChart2, Settings, Sun, Moon } from 'lucide-react';
+import { Home, CreditCard, HandCoins, Users, BarChart2, Settings, Sun, Moon, CalendarDays, CalendarOff, BookOpen, UserCheck } from 'lucide-react';
 
-const NAV_ITEMS = [
-  { key: 'dashboard',   label: 'Home',      Icon: Home },
-  { key: 'loans',       label: 'Loans',     Icon: CreditCard },
-  { key: 'collection',  label: 'Collect',   Icon: HandCoins },
-  { key: 'customers',   label: 'Customers', Icon: Users },
-  { key: 'reports',     label: 'Reports',   Icon: BarChart2 },
-  { key: 'settings',    label: 'Settings',  Icon: Settings },
+const NAV_SECTIONS = [
+  {
+    label: 'Finance',
+    items: [
+      { key: 'dashboard',   label: 'Dashboard',  Icon: Home },
+      { key: 'loans',       label: 'Loans',       Icon: CreditCard },
+      { key: 'collection',  label: 'Collections', Icon: HandCoins },
+      { key: 'customers',   label: 'Customers',   Icon: Users },
+      { key: 'reports',     label: 'Reports',     Icon: BarChart2 },
+    ],
+  },
+  {
+    label: 'HR & People',
+    items: [
+      { key: 'employees',   label: 'Employees',   Icon: UserCheck },
+      { key: 'attendance',  label: 'Attendance',  Icon: CalendarDays },
+      { key: 'leave',       label: 'Leave',       Icon: CalendarOff },
+      { key: 'policies',    label: 'Policies',    Icon: BookOpen },
+    ],
+  },
 ];
 
 // Sidebar — fixed desktop nav (≥ 1024px)
@@ -45,49 +58,72 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
-        {NAV_ITEMS.map(({ key, label, Icon }) => {
-          const active = current === key;
-          return (
-            <button
-              key={key}
-              onClick={() => onNavigate(key)}
-              className="flex items-center gap-3 rounded-xl btn-press w-full text-left"
-              style={{
-                padding: '10px 14px',
-                background: active ? t.primarySoft : 'transparent',
-                border: `1.5px solid ${active ? t.primary + '33' : 'transparent'}`,
-                cursor: 'pointer',
-                transition: 'background 0.18s, border-color 0.18s',
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = t.bgSubtle; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-            >
-              <Icon
-                size={18}
-                color={active ? t.primary : t.textMuted}
-                strokeWidth={active ? 2.5 : 1.8}
-              />
-              <span style={{
-                fontSize: '0.875rem',
-                fontWeight: active ? 700 : 500,
-                color: active ? t.primary : t.text,
+        {NAV_SECTIONS.map(({ label, items }, sectionIdx) => (
+          <div key={label}>
+            {/* Section label */}
+            {sectionIdx > 0 && (
+              <div style={{
+                margin: '10px 8px 6px',
+                borderTop: `1px solid ${t.border}`,
+                paddingTop: 10,
               }}>
-                {label}
-              </span>
-              {active && (
-                <span
+                <span style={{
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: t.textMuted,
+                  paddingLeft: 6,
+                }}>
+                  {label}
+                </span>
+              </div>
+            )}
+            {items.map(({ key, label: itemLabel, Icon }) => {
+              const active = current === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => onNavigate(key)}
+                  className="flex items-center gap-3 rounded-xl btn-press w-full text-left"
                   style={{
-                    marginLeft: 'auto',
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: t.primary,
+                    padding: '10px 14px',
+                    background: active ? t.primarySoft : 'transparent',
+                    border: `1.5px solid ${active ? t.primary + '33' : 'transparent'}`,
+                    cursor: 'pointer',
+                    transition: 'background 0.18s, border-color 0.18s',
                   }}
-                />
-              )}
-            </button>
-          );
-        })}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.background = t.bgSubtle; }}
+                  onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <Icon
+                    size={18}
+                    color={active ? t.primary : t.textMuted}
+                    strokeWidth={active ? 2.5 : 1.8}
+                  />
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: active ? 700 : 500,
+                    color: active ? t.primary : t.text,
+                  }}>
+                    {itemLabel}
+                  </span>
+                  {active && (
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: t.primary,
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Bottom: theme toggle */}

@@ -38,3 +38,6 @@ Thumbs.db
 
 # Package manager locks (keep package-lock.json but ignore yarn.lock if present)
 yarn.lock
+
+# Nested project copy (not a submodule)
+micro-finance-0.1/

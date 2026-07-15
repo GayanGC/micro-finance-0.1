@@ -11,13 +11,17 @@ import CustomersScreen from './screens/CustomersScreen.jsx';
 import CollectionScreen from './screens/CollectionScreen.jsx';
 import ReportsScreen from './screens/ReportsScreen.jsx';
 import SettingsScreen from './screens/SettingsScreen.jsx';
+import EmployeesScreen from './screens/EmployeesScreen.jsx';
+import AttendanceScreen from './screens/AttendanceScreen.jsx';
+import LeaveScreen from './screens/LeaveScreen.jsx';
+import PolicyScreen from './screens/PolicyScreen.jsx';
 
 // Navigation shell
 import BottomNav from './components/BottomNav.jsx';
 import Sidebar from './components/Sidebar.jsx';
 
 // Main nav tabs
-const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports'];
+const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports', 'employees', 'attendance', 'leave', 'policies'];
 
 export default function App() {
   // ── Theme ──────────────────────────────────────────────────────────
@@ -169,6 +173,42 @@ export default function App() {
             onToggleTheme={toggleTheme}
             onLogout={logout}
             onBack={goBack}
+          />
+        )}
+
+        {currentScreen === 'employees' && (
+          <EmployeesScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
+
+        {currentScreen === 'attendance' && (
+          <AttendanceScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
+
+        {currentScreen === 'leave' && (
+          <LeaveScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
+
+        {currentScreen === 'policies' && (
+          <PolicyScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
           />
         )}
       </main>

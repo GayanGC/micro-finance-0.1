@@ -1,18 +1,22 @@
-import { Home, CreditCard, HandCoins, Users, BarChart2 } from 'lucide-react';
+import { Home, CreditCard, HandCoins, Users, BarChart2, UserCheck, CalendarDays, CalendarOff, BookOpen } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { key: 'dashboard',   label: 'Home',      Icon: Home },
-  { key: 'loans',       label: 'Loans',     Icon: CreditCard },
-  { key: 'collection',  label: 'Collect',   Icon: HandCoins },
-  { key: 'customers',   label: 'Customers', Icon: Users },
-  { key: 'reports',     label: 'Reports',   Icon: BarChart2 },
+  { key: 'dashboard',   label: 'Home',       Icon: Home },
+  { key: 'loans',       label: 'Loans',      Icon: CreditCard },
+  { key: 'collection',  label: 'Collect',    Icon: HandCoins },
+  { key: 'customers',   label: 'Customers',  Icon: Users },
+  { key: 'reports',     label: 'Reports',    Icon: BarChart2 },
+  { key: 'employees',   label: 'Employees',  Icon: UserCheck },
+  { key: 'attendance',  label: 'Attendance', Icon: CalendarDays },
+  { key: 'leave',       label: 'Leave',      Icon: CalendarOff },
+  { key: 'policies',    label: 'Policies',   Icon: BookOpen },
 ];
 
 // BottomNav — fixed mobile tab bar (< 1024px)
 export default function BottomNav({ t, current, onNavigate }) {
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 flex items-stretch"
+      className="lg:hidden fixed bottom-0 left-0 right-0 flex items-stretch overflow-x-auto scrollbar-hide"
       style={{
         background: t.card,
         borderTop: `1px solid ${t.border}`,

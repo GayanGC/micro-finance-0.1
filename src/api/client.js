@@ -140,3 +140,57 @@ export const getReportBreakdown = () => {
 export const getNotifications = () => {
   return apiRequest('/notifications');
 };
+
+// ── Employee API ────────────────────────────────────────────────────────────
+export const getEmployees = (status = '') => {
+  const q = status ? `?status=${status}` : '';
+  return apiRequest(`/employees${q}`);
+};
+export const registerEmployee = (data) =>
+  apiRequest('/employees', { method: 'POST', body: data });
+export const getEmployee = (id) =>
+  apiRequest(`/employees/${id}`);
+export const updateEmployee = (id, data) =>
+  apiRequest(`/employees/${id}`, { method: 'PUT', body: data });
+export const getMyProfile = () =>
+  apiRequest('/employees/my-profile');
+export const getEmployeeStats = () =>
+  apiRequest('/employees/stats');
+
+// ── Attendance API ──────────────────────────────────────────────────────────
+export const markAttendance = (data) =>
+  apiRequest('/attendance', { method: 'POST', body: data });
+export const getMyAttendance = (month, year) =>
+  apiRequest(`/attendance/my?month=${month}&year=${year}`);
+export const getAllAttendance = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/attendance/all${params ? '?' + params : ''}`);
+};
+export const updateAttendance = (id, data) =>
+  apiRequest(`/attendance/${id}`, { method: 'PUT', body: data });
+export const getAttendanceSummary = (employeeId, month, year) =>
+  apiRequest(`/attendance/summary?employeeId=${employeeId}&month=${month}&year=${year}`);
+
+// ── Leave API ───────────────────────────────────────────────────────────────
+export const requestLeave = (data) =>
+  apiRequest('/leaves', { method: 'POST', body: data });
+export const getMyLeaves = () =>
+  apiRequest('/leaves/my');
+export const getAllLeaves = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/leaves/all${params ? '?' + params : ''}`);
+};
+export const reviewLeave = (id, data) =>
+  apiRequest(`/leaves/${id}/review`, { method: 'PUT', body: data });
+
+// ── Policy API ──────────────────────────────────────────────────────────────
+export const getPolicies = (category = '') => {
+  const q = category ? `?category=${category}` : '';
+  return apiRequest(`/policies${q}`);
+};
+export const createPolicy = (data) =>
+  apiRequest('/policies', { method: 'POST', body: data });
+export const updatePolicy = (id, data) =>
+  apiRequest(`/policies/${id}`, { method: 'PUT', body: data });
+export const deletePolicy = (id) =>
+  apiRequest(`/policies/${id}`, { method: 'DELETE' });
