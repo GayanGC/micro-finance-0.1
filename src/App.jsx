@@ -78,7 +78,7 @@ export default function App() {
         className="theme-transition"
         style={{ minHeight: '100vh', background: t.bg }}
       >
-        <LoginScreen t={t} />
+        <LoginScreen t={t} onToggleTheme={toggleTheme} />
       </div>
     );
   }

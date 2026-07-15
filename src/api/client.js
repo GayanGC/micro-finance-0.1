@@ -61,10 +61,11 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 // Auth API
-export const login = (phone, pin) => {
+export const login = (credentials) => {
+  // credentials: { loginType: 'phone', phone, pin } or { loginType: 'email', email, password }
   return apiRequest('/auth/login', {
     method: 'POST',
-    body: { phone, pin }
+    body: credentials
   });
 };
 

@@ -23,9 +23,9 @@ const connectDB = require('../config/db');
 // ─── Sample Data ──────────────────────────────────────────────────────────
 
 const sampleUsers = [
-  { name: 'Admin User',       phone: '0771234567', pin: '123456', role: 'admin', branch: 'Head Office' },
-  { name: 'Amal Kumara',      phone: '0712345678', pin: '1234',   role: 'agent', branch: 'Colombo' },
-  { name: 'Nimal Perera',     phone: '0777654321', pin: '4321',   role: 'agent', branch: 'Kandy' },
+  { name: 'Admin User',       phone: '0771234567', pin: '123456', email: 'admin@microfinance.lk', password: 'password123', role: 'admin', branch: 'Head Office' },
+  { name: 'Amal Kumara',      phone: '0712345678', pin: '1234',   email: 'amal@microfinance.lk',  password: 'password123', role: 'agent', branch: 'Colombo' },
+  { name: 'Nimal Perera',     phone: '0777654321', pin: '4321',   email: 'nimal@microfinance.lk', password: 'password123', role: 'agent', branch: 'Kandy' },
 ];
 
 const sampleCustomers = [
@@ -98,7 +98,7 @@ const importData = async () => {
     console.log('\n🎉  Database seeded successfully!');
     console.log('\n📋  Login credentials:');
     sampleUsers.forEach(u => {
-      console.log(`   ${u.role.toUpperCase().padEnd(6)} | Phone: ${u.phone} | PIN: ${u.pin}`);
+      console.log(`   ${u.role.toUpperCase().padEnd(6)} | Phone: ${u.phone} | PIN: ${u.pin} | Email: ${u.email} | Pass: ${u.password}`);
     });
     process.exit(0);
   } catch (error) {

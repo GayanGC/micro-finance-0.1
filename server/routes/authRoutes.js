@@ -17,12 +17,25 @@ const loginLimiter = rateLimit({
 
 // ─── Validation rules ────────────────────────────────────────────────────
 const loginValidation = [
+  body('loginType')
+    .notEmpty().withMessage('Login type is required')
+    .isIn(['phone', 'email']).withMessage('Login type must be phone or email'),
   body('phone')
+    .if(body('loginType').equals('phone'))
     .notEmpty().withMessage('Phone number is required')
     .matches(/^0\d{9}$/).withMessage('Enter a valid 10-digit Sri Lankan phone number'),
   body('pin')
+    .if(body('loginType').equals('phone'))
     .notEmpty().withMessage('PIN is required')
     .isLength({ min: 4, max: 6 }).withMessage('PIN must be 4–6 digits'),
+  body('email')
+    .if(body('loginType').equals('email'))
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Enter a valid email address'),
+  body('password')
+    .if(body('loginType').equals('email'))
+    .notEmpty().withMessage('Password is required')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 ];
 
 const registerValidation = [
@@ -34,6 +47,12 @@ const registerValidation = [
     .notEmpty().withMessage('PIN is required')
     .isLength({ min: 4, max: 6 }).withMessage('PIN must be 4–6 digits')
     .isNumeric().withMessage('PIN must contain only digits'),
+  body('email')
+    .optional()
+    .isEmail().withMessage('Enter a valid email address'),
+  body('password')
+    .optional()
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   body('role')
     .optional()
     .isIn(['admin', 'agent']).withMessage('Role must be admin or agent'),

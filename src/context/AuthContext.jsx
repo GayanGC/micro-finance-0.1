@@ -22,9 +22,9 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (phone, pin) => {
+  const login = async (credentials) => {
     try {
-      const response = await apiLogin(phone, pin);
+      const response = await apiLogin(credentials);
       if (response && response.success && response.data) {
         const { token: receivedToken, user: receivedUser } = response.data;
 
