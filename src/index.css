@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ─── Google Fonts ────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
 /* ─── Global resets & base ────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -9,10 +12,11 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  text-rendering: optimizeLegibility;
 }
 
 /* ─── Font utilities ──────────────────────────────────── */
@@ -24,10 +28,31 @@ body {
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ─── Custom scrollbar (desktop) ─────────────────────── */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 99px;
+    background: rgba(100,120,115,0.25);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100,120,115,0.45);
+  }
+}
+
+/* Hide scrollbar on nav elements */
+nav::-webkit-scrollbar { display: none; }
+nav { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ─── Smooth theme transitions ────────────────────────── */
 .theme-transition,
 .theme-transition * {
-  transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* ─── Ink stamp badge ─────────────────────────────────── */
@@ -38,21 +63,89 @@ body {
   border-radius: 9999px;
   border-width: 1.5px;
   border-style: solid;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  transform: rotate(-4deg);
+  transform: rotate(-3deg);
   line-height: 1.6;
   white-space: nowrap;
   font-family: 'Inter', sans-serif;
 }
 
-/* ─── Custom scrollbar (desktop) ─────────────────────── */
-@media (min-width: 1024px) {
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { border-radius: 3px; }
+/* ─── Ripple / press animation ───────────────────────── */
+@keyframes press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.btn-press { user-select: none; }
+.btn-press:active { animation: press 0.15s ease; }
+
+/* ─── Fade-in for screen transitions ─────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-enter { animation: fadeIn 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ─── Slide-up for new screen push ───────────────────── */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-slide-up { animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ─── Modal backdrop ──────────────────────────────────── */
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-backdrop { animation: backdropIn 0.2s ease forwards; }
+.modal-card     { animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ─── Collection row check animation ─────────────────── */
+@keyframes checkPop {
+  0%   { transform: scale(0.8) rotate(-4deg); opacity: 0; }
+  60%  { transform: scale(1.1) rotate(-5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+.stamp-pop { animation: checkPop 0.3s ease forwards; }
+
+/* ─── Shimmer loading skeleton ────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e2ddd6 25%, #ede9e0 50%, #e2ddd6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 10px;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e2e2a 25%, #243530 50%, #1e2e2a 75%);
+  background-size: 200% 100%;
+}
+
+/* ─── Pulse dot (for pending status) ─────────────────── */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+.pulse-dot { animation: pulseDot 1.5s ease infinite; }
+
+/* ─── Chart tooltip ───────────────────────────────────── */
+.chart-tooltip {
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  backdrop-filter: blur(8px);
 }
 
 /* ─── Input base resets ───────────────────────────────── */
@@ -61,40 +154,9 @@ input, textarea, select {
   font-family: inherit;
 }
 
-/* ─── Ripple / press animation ───────────────────────── */
-@keyframes press {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(0.96); }
-  100% { transform: scale(1); }
+input:focus, textarea:focus, select:focus {
+  outline: none;
 }
-.btn-press:active { animation: press 0.15s ease; }
 
-/* ─── Fade-in for screen transitions ─────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.screen-enter { animation: fadeIn 0.22s ease forwards; }
-
-/* ─── Slide-up for new screen push ───────────────────── */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.screen-slide-up { animation: slideUp 0.25s ease forwards; }
-
-/* ─── Collection row check animation ─────────────────── */
-@keyframes checkPop {
-  0%   { transform: scale(0.8) rotate(-4deg); opacity: 0; }
-  60%  { transform: scale(1.1) rotate(-6deg); opacity: 1; }
-  100% { transform: scale(1) rotate(-4deg); opacity: 1; }
-}
-.stamp-pop { animation: checkPop 0.3s ease forwards; }
-
-/* ─── Chart tooltip ───────────────────────────────────── */
-.chart-tooltip {
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-}
+/* ─── No text selection on interactive elements ───────── */
+button { -webkit-tap-highlight-color: transparent; }

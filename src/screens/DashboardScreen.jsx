@@ -13,28 +13,71 @@ function QuickAction({ t, icon: Icon, label, color, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-2 rounded-2xl p-4 btn-press flex-1"
+      className="flex flex-col items-center justify-center gap-2 rounded-2xl p-4 btn-press w-full"
       style={{
         background: t.card,
-        border: `1px solid ${t.border}`,
+        border: `1.5px solid ${t.border}`,
         cursor: 'pointer',
-        boxShadow: t.shadow,
-        minHeight: 90,
-        transition: 'transform 0.15s, box-shadow 0.15s',
+        minHeight: 96,
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden',
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = t.shadowMd; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = t.shadow; e.currentTarget.style.transform = 'translateY(0)'; }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.boxShadow = `0 8px 24px ${color}25`;
+        e.currentTarget.style.borderColor = color + '55';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.borderColor = t.border;
+      }}
     >
       <div
-        className="flex items-center justify-center rounded-2xl"
-        style={{ width: 44, height: 44, background: `${color}1A` }}
+        className="flex items-center justify-center rounded-xl"
+        style={{
+          width: 44,
+          height: 44,
+          background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+          border: `1px solid ${color}33`,
+        }}
       >
-        <Icon size={22} color={color} strokeWidth={2} />
+        <Icon size={20} color={color} strokeWidth={2} />
       </div>
-      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: t.text, textAlign: 'center' }}>
+      <span style={{
+        fontSize: '0.72rem',
+        fontWeight: 700,
+        color: t.text,
+        textAlign: 'center',
+        lineHeight: 1.3,
+        wordBreak: 'break-word',
+        maxWidth: '100%',
+      }}>
         {label}
       </span>
     </button>
+  );
+}
+
+function SectionLabel({ t, children, action }) {
+  return (
+    <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 3, height: 16, borderRadius: 99, background: t.primary, flexShrink: 0 }} />
+        <h3 style={{
+          fontFamily: 'Poppins',
+          fontWeight: 700,
+          fontSize: '0.82rem',
+          color: t.textMuted,
+          textTransform: 'uppercase',
+          letterSpacing: '0.07em',
+        }}>
+          {children}
+        </h3>
+      </div>
+      {action}
+    </div>
   );
 }
 
@@ -59,7 +102,8 @@ function RecentLoanCard({ t, loan }) {
           style={{
             width: 42,
             height: 42,
-            background: t.primarySoft,
+            background: `linear-gradient(135deg, ${t.primary}22, ${t.primary}11)`,
+            border: `1.5px solid ${t.primary}33`,
             fontFamily: 'Poppins',
             fontWeight: 700,
             fontSize: '0.85rem',
@@ -74,8 +118,8 @@ function RecentLoanCard({ t, loan }) {
           <div style={{ fontWeight: 600, fontSize: '0.88rem', color: t.text, fontFamily: 'Poppins' }} className="truncate">
             {customerName}
           </div>
-          <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 1 }} className="truncate">
-            {loan.type} · {area}
+          <div style={{ fontSize: '0.72rem', color: t.textMuted, marginTop: 2 }} className="truncate">
+            {loan.type}{area ? ` · ${area}` : ''}
           </div>
         </div>
       </div>
@@ -85,8 +129,8 @@ function RecentLoanCard({ t, loan }) {
         <span
           style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontWeight: 600,
-            fontSize: '0.82rem',
+            fontWeight: 700,
+            fontSize: '0.85rem',
             color: t.text,
           }}
         >
@@ -141,18 +185,26 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
     return (
       <div className="flex flex-col min-h-full screen-enter" style={{ background: t.bg }}>
         <TopBar t={t} title="Dashboard" onToggleTheme={onToggleTheme} onOpenSettings={onOpenSettings} />
-        <div className="flex-1 px-4 py-6 flex flex-col gap-6" style={{ overflowY: 'auto' }}>
-          <div className="animate-pulse flex flex-col gap-3">
-            <div className="h-6 w-32 rounded" style={{ background: t.bgSubtle }} />
-            <div className="h-4 w-48 rounded" style={{ background: t.bgSubtle }} />
+        <div className="flex-1 px-4 py-6 flex flex-col gap-5" style={{ overflowY: 'auto' }}>
+          {/* Greeting skeleton */}
+          <div className="animate-pulse rounded-2xl p-5" style={{ background: t.card, border: `1px solid ${t.border}` }}>
+            <div className="h-5 w-40 rounded mb-2" style={{ background: t.bgSubtle }} />
+            <div className="h-3 w-56 rounded" style={{ background: t.bgSubtle }} />
           </div>
+          {/* Stat cards skeleton */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="animate-pulse h-28 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
             ))}
           </div>
+          {/* Quick actions skeleton */}
+          <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="animate-pulse rounded-2xl border" style={{ background: t.card, borderColor: t.border, minHeight: 96 }} />
+            ))}
+          </div>
+          {/* Loans skeleton */}
           <div className="flex flex-col gap-3">
-            <div className="h-5 w-24 rounded" style={{ background: t.bgSubtle }} />
             {[1, 2, 3].map(i => (
               <div key={i} className="animate-pulse h-16 rounded-2xl border" style={{ background: t.card, borderColor: t.border }} />
             ))}
@@ -210,87 +262,90 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
         style={{ overflowY: 'auto', paddingTop: 20 }}
       >
         <div className="max-w-6xl mx-auto w-full px-4 lg:px-6 flex flex-col">
-          {/* Greeting */}
-          <div className="mb-5">
-            <h2
-              style={{
-                fontFamily: 'Poppins',
-                fontWeight: 700,
-                fontSize: '1.25rem',
-              color: t.text,
-              lineHeight: 1.2,
+          {/* Greeting banner */}
+          <div
+            className="rounded-2xl p-5 mb-6"
+            style={{
+              background: `linear-gradient(135deg, ${t.primary}12 0%, ${t.accent}08 100%)`,
+              border: `1px solid ${t.primary}20`,
             }}
           >
-            Good {getGreeting()}, Agent 👋
-          </h2>
-          <p style={{ fontSize: '0.78rem', color: t.textMuted, marginTop: 3 }}>
-            {new Date().toLocaleDateString('en-LK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
+            <h2 style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '1.3rem', color: t.text, lineHeight: 1.25 }}>
+              Good {getGreeting()}, {user?.name?.split(' ')[0] || 'Agent'} 👋
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: t.textMuted, marginTop: 4 }}>
+              {new Date().toLocaleDateString('en-LK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
 
-        {/* Stat cards — horizontal scroll on mobile, grid on desktop */}
-        <div
-          className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible"
-          style={{ marginBottom: 24 }}
-        >
-          <StatCard t={t} label="Total Loans" value={totalLoans} icon={CreditCard} />
-          <StatCard t={t} label="Active Loans" value={activeLoans} icon={TrendingUp} iconColor={t.active} />
-          <StatCard t={t} label="Today's Collections" value={todayCollections} icon={HandCoins} isAmount accent />
-          <StatCard t={t} label="Overdue Count" value={overdueCount} icon={AlertCircle} iconColor={t.overdue} />
-        </div>
-
-        {/* Quick actions */}
+        {/* Stat cards — always grid */}
         <div style={{ marginBottom: 24 }}>
-          <h3
-            style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.88rem', color: t.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}
-          >
-            Quick Actions
-          </h3>
-          <div className="flex gap-3">
-            <QuickAction t={t} icon={CreditCard} label="New Loan" color={t.primary} onClick={() => onNavigate('newloan')} />
-            <QuickAction t={t} icon={HandCoins} label="Collect Payment" color={t.accent} onClick={() => onNavigate('collection')} />
-            <QuickAction t={t} icon={BarChart2} label="Reports" color={t.active} onClick={() => onNavigate('reports')} />
-            <QuickAction t={t} icon={UserCheck} label="Employees" color={'#7C5CBF'} onClick={() => onNavigate('employees')} />
-            <QuickAction t={t} icon={CalendarOff} label="Leave" color={t.accent} onClick={() => onNavigate('leave')} />
+          <SectionLabel t={t}>Overview</SectionLabel>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard t={t} label="Total Loans" value={totalLoans} icon={CreditCard} />
+            <StatCard t={t} label="Active Loans" value={activeLoans} icon={TrendingUp} iconColor={t.active} />
+            <StatCard t={t} label="Today's Collections" value={todayCollections} icon={HandCoins} isAmount accent />
+            <StatCard t={t} label="Overdue Count" value={overdueCount} icon={AlertCircle} iconColor={t.overdue} />
+          </div>
+        </div>
+
+        {/* Quick Actions — 3 cols mobile / 5 cols desktop */}
+        <div style={{ marginBottom: 24 }}>
+          <SectionLabel t={t}>Quick Actions</SectionLabel>
+          <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
+            <QuickAction t={t} icon={CreditCard}  label="New Loan"    color={t.primary}  onClick={() => onNavigate('newloan')} />
+            <QuickAction t={t} icon={HandCoins}   label="Collections" color={t.accent}   onClick={() => onNavigate('collection')} />
+            <QuickAction t={t} icon={BarChart2}   label="Reports"     color={t.active}   onClick={() => onNavigate('reports')} />
+            <QuickAction t={t} icon={UserCheck}   label="Employees"   color={'#7C5CBF'}  onClick={() => onNavigate('employees')} />
+            <QuickAction t={t} icon={CalendarOff} label="Leave"       color={t.overdue}  onClick={() => onNavigate('leave')} />
           </div>
         </div>
 
         {/* HR Stats (admin only) */}
         {isAdmin && hrStats && (
           <div style={{ marginBottom: 24 }}>
-            <h3
-              style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.88rem', color: t.textMuted, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}
-            >
-              HR Overview
-            </h3>
-            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 lg:grid lg:grid-cols-3 lg:overflow-visible">
+            <SectionLabel t={t}>HR Overview</SectionLabel>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               <StatCard t={t} label="Total Employees" value={hrStats.totalEmployees ?? 0} icon={Users} />
-              <StatCard t={t} label="Present Today" value={hrStats.todayPresent ?? 0} icon={CalendarDays} iconColor={t.active} />
-              <StatCard t={t} label="Pending Leaves" value={hrStats.pendingLeaves ?? 0} icon={CalendarOff} iconColor={t.pending} />
+              <StatCard t={t} label="Present Today"   value={hrStats.todayPresent   ?? 0} icon={CalendarDays} iconColor={t.active} />
+              <StatCard t={t} label="Pending Leaves"  value={hrStats.pendingLeaves  ?? 0} icon={CalendarOff}  iconColor={t.pending} />
             </div>
           </div>
         )}
 
-        {/* Recent activity */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3
-              style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.88rem', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}
-            >
-              Recent Loans
-            </h3>
-            <button
-              onClick={() => onNavigate('loans')}
-              style={{ fontSize: '0.75rem', color: t.primary, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              View all →
-            </button>
-          </div>
+        {/* Recent Loans */}
+        <div style={{ marginBottom: 8 }}>
+          <SectionLabel
+            t={t}
+            action={
+              <button
+                onClick={() => onNavigate('loans')}
+                style={{
+                  fontSize: '0.75rem',
+                  color: t.primary,
+                  fontWeight: 700,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'Poppins',
+                  padding: '2px 0',
+                }}
+              >
+                View all →
+              </button>
+            }
+          >
+            Recent Loans
+          </SectionLabel>
 
           <div className="flex flex-col gap-3">
             {recentLoans.length === 0 ? (
-              <div style={{ fontSize: '0.8rem', color: t.textMuted, textAlign: 'center', padding: '16px 0' }}>
-                No recent loans.
+              <div
+                className="rounded-2xl p-6 flex flex-col items-center gap-2"
+                style={{ background: t.card, border: `1px solid ${t.border}` }}
+              >
+                <CreditCard size={28} color={t.textMuted} strokeWidth={1.5} />
+                <span style={{ fontSize: '0.82rem', color: t.textMuted }}>No recent loans found.</span>
               </div>
             ) : (
               recentLoans.map(loan => (
@@ -305,12 +360,22 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
           <div
             className="flex items-center gap-3 rounded-2xl p-4 mt-4"
             style={{
-              background: `${t.overdue}12`,
+              background: `${t.overdue}10`,
               border: `1.5px solid ${t.overdue}33`,
             }}
           >
-            <AlertCircle size={18} color={t.overdue} strokeWidth={2} />
-            <div>
+            <div
+              className="flex-shrink-0 flex items-center justify-center rounded-xl"
+              style={{
+                width: 36,
+                height: 36,
+                background: `${t.overdue}18`,
+                border: `1px solid ${t.overdue}30`,
+              }}
+            >
+              <AlertCircle size={18} color={t.overdue} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex-1">
               <div style={{ fontWeight: 700, fontSize: '0.82rem', color: t.overdue }}>
                 {overdueCount} Overdue Loan{overdueCount > 1 ? 's' : ''}
               </div>
@@ -320,7 +385,18 @@ export default function DashboardScreen({ t, onNavigate, onToggleTheme, onOpenSe
             </div>
             <button
               onClick={() => onNavigate('loans')}
-              style={{ marginLeft: 'auto', fontSize: '0.72rem', color: t.overdue, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+              style={{
+                fontSize: '0.72rem',
+                color: t.overdue,
+                fontWeight: 700,
+                background: 'none',
+                border: `1px solid ${t.overdue}44`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                flexShrink: 0,
+                padding: '4px 10px',
+                fontFamily: 'Poppins',
+              }}
             >
               View →
             </button>
