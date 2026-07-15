@@ -15,13 +15,15 @@ import EmployeesScreen from './screens/EmployeesScreen.jsx';
 import AttendanceScreen from './screens/AttendanceScreen.jsx';
 import LeaveScreen from './screens/LeaveScreen.jsx';
 import PolicyScreen from './screens/PolicyScreen.jsx';
+import SalariesScreen from './screens/SalariesScreen.jsx';
+import SupportScreen from './screens/SupportScreen.jsx';
 
 // Navigation shell
 import BottomNav from './components/BottomNav.jsx';
 import Sidebar from './components/Sidebar.jsx';
 
 // Main nav tabs
-const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports', 'employees', 'attendance', 'leave', 'policies'];
+const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports', 'employees', 'attendance', 'leave', 'policies', 'salaries', 'support'];
 
 export default function App() {
   // ── Theme ──────────────────────────────────────────────────────────
@@ -205,6 +207,24 @@ export default function App() {
 
         {currentScreen === 'policies' && (
           <PolicyScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
+
+        {currentScreen === 'salaries' && (
+          <SalariesScreen
+            t={t}
+            onNavigate={navigate}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
+
+        {currentScreen === 'support' && (
+          <SupportScreen
             t={t}
             onNavigate={navigate}
             onToggleTheme={toggleTheme}

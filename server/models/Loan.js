@@ -22,6 +22,31 @@ const loanSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    interestRateMonthly: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    interestRateAnnual: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    paymentFrequency: {
+      type: String,
+      enum: ['Daily', 'Weekly', 'Monthly'],
+      default: 'Daily',
+    },
+    installments: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+    installmentsPaid: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     balance: {
       type: Number,
       required: true,

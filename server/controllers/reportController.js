@@ -15,6 +15,16 @@ const getSummary = asyncHandler(async (req, res) => {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
 
+  const isAgent = req.user.role === 'agent';
+  const loanFilter = isAgent ? { createdBy: req.user._id } : {};
+  const activeFilter = isAgent ? { status: 'active', createdBy: req.user._id } : { status: 'active' };
+  const overdueFilter = isAgent ? { status: 'overdue', createdBy: req.user._id } : { status: 'overdue' };
+  const customerFilter = isAgent ? { createdBy: req.user._id } : {};
+
+  const paymentMatch = isAgent 
+    ? { collectedAt: { $gte: todayStart, $lte: todayEnd }, collectedBy: req.user._id }
+    : { collectedAt: { $gte: todayStart, $lte: todayEnd } };
+
   const [
     totalLoans,
     activeLoans,
@@ -22,12 +32,12 @@ const getSummary = asyncHandler(async (req, res) => {
     totalCustomers,
     todayPayments,
   ] = await Promise.all([
-    Loan.countDocuments(),
-    Loan.countDocuments({ status: 'active' }),
-    Loan.countDocuments({ status: 'overdue' }),
-    Customer.countDocuments(),
+    Loan.countDocuments(loanFilter),
+    Loan.countDocuments(activeFilter),
+    Loan.countDocuments(overdueFilter),
+    Customer.countDocuments(customerFilter),
     Payment.aggregate([
-      { $match: { collectedAt: { $gte: todayStart, $lte: todayEnd } } },
+      { $match: paymentMatch },
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]),
   ]);

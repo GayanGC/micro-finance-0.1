@@ -1,4 +1,4 @@
-import { Home, CreditCard, HandCoins, Users, BarChart2, Sun, Moon, CalendarDays, CalendarOff, BookOpen, UserCheck, LogOut } from 'lucide-react';
+import { Home, CreditCard, HandCoins, Users, BarChart2, Sun, Moon, CalendarDays, CalendarOff, BookOpen, UserCheck, LogOut, DollarSign, HelpCircle } from 'lucide-react';
 
 const NAV_SECTIONS = [
   {
@@ -18,6 +18,8 @@ const NAV_SECTIONS = [
       { key: 'attendance', label: 'Attendance', Icon: CalendarDays },
       { key: 'leave',      label: 'Leave',      Icon: CalendarOff },
       { key: 'policies',   label: 'Policies',   Icon: BookOpen },
+      { key: 'salaries',   label: 'Salaries',   Icon: DollarSign },
+      { key: 'support',    label: 'Support Q&A', Icon: HelpCircle },
     ],
   },
 ];

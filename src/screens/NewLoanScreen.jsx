@@ -51,7 +51,10 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
   const [form, setForm] = useState({
     loanType: 'Daily',
     amount: '',
-    interestRate: '',
+    interestRateMonthly: '',
+    interestRateAnnual: '',
+    paymentFrequency: 'Daily',
+    installments: '30',
     guarantor: '',
   });
 
@@ -74,7 +77,18 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
   const [errorMsg, setErrorMsg] = useState('');
   const fileRef = useRef();
 
-  function set(key, val) { setForm(f => ({ ...f, [key]: val })); }
+  function set(key, val) { 
+    setForm(f => {
+      const updated = { ...f, [key]: val };
+      // Auto compute annual rate if monthly is changed, and vice versa
+      if (key === 'interestRateMonthly') {
+        updated.interestRateAnnual = val ? String(parseFloat(val) * 12) : '';
+      } else if (key === 'interestRateAnnual') {
+        updated.interestRateMonthly = val ? String((parseFloat(val) / 12).toFixed(2)) : '';
+      }
+      return updated;
+    }); 
+  }
 
   // Search suggestions useEffect
   useEffect(() => {
@@ -102,9 +116,18 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
     if (!selectedCustomer) e.customerName = 'Required';
     if (isNewCustomer && !newCustomerPhone.trim()) e.newCustomerPhone = 'Phone number is required';
     if (!form.amount || isNaN(form.amount) || +form.amount <= 0) e.amount = 'Enter a valid amount';
-    if (!form.interestRate || isNaN(form.interestRate)) e.interestRate = 'Enter a valid rate';
+    if (!form.interestRateAnnual || isNaN(form.interestRateAnnual)) e.interestRateAnnual = 'Enter a valid rate';
+    if (!form.installments || isNaN(form.installments) || +form.installments <= 0) e.installments = 'Enter installments';
     return e;
   }
+
+  // Dynamic values
+  const principalAmt = Number(form.amount) || 0;
+  const annualRate = (Number(form.interestRateAnnual) || 0) / 100;
+  const totalTerms = Number(form.installments) || 1;
+  const interestAmt = Math.round(principalAmt * annualRate);
+  const totalRepayable = principalAmt + interestAmt;
+  const installmentAmt = Math.round(totalRepayable / totalTerms);
 
   async function handleSubmit() {
     const e = validate();
@@ -133,16 +156,28 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
         }
       }
 
-      // 30 days default due date
+      // Compute due date based on payment frequency & installments count
       const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + 30);
+      const count = Number(form.installments) || 30;
+      if (form.paymentFrequency === 'Daily') {
+        dueDate.setDate(dueDate.getDate() + count);
+      } else if (form.paymentFrequency === 'Weekly') {
+        dueDate.setDate(dueDate.getDate() + count * 7);
+      } else if (form.paymentFrequency === 'Monthly') {
+        dueDate.setMonth(dueDate.getMonth() + count);
+      }
 
       // Create loan
       const loanRes = await createLoan({
         customer: finalCustomerId,
         type: form.loanType,
-        amount: Number(form.amount),
-        interestRate: Number(form.interestRate),
+        amount: principalAmt,
+        interestRate: Number(form.interestRateAnnual) || 0,
+        interestRateMonthly: Number(form.interestRateMonthly) || 0,
+        interestRateAnnual: Number(form.interestRateAnnual) || 0,
+        paymentFrequency: form.paymentFrequency,
+        installments: totalTerms,
+        installmentsPaid: 0,
         guarantor: form.guarantor,
         dueDate: dueDate.toISOString(),
         documentUrl: file ? file.name : ''
@@ -372,17 +407,82 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
               {errors.amount && <span style={{ fontSize: '0.72rem', color: t.overdue }}>{errors.amount}</span>}
             </FormField>
 
-            <FormField t={t} label="Interest Rate (% per annum)">
-              <TextInput
-                t={t}
-                value={form.interestRate}
-                onChange={e => set('interestRate', e.target.value)}
-                placeholder="e.g. 12"
-                icon={Percent}
-                type="number"
-              />
-              {errors.interestRate && <span style={{ fontSize: '0.72rem', color: t.overdue }}>{errors.interestRate}</span>}
-            </FormField>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField t={t} label="Monthly Interest Rate (%)">
+                <TextInput
+                  t={t}
+                  value={form.interestRateMonthly}
+                  onChange={e => set('interestRateMonthly', e.target.value)}
+                  placeholder="e.g. 1"
+                  icon={Percent}
+                  type="number"
+                />
+              </FormField>
+
+              <FormField t={t} label="Annual Interest Rate (%)">
+                <TextInput
+                  t={t}
+                  value={form.interestRateAnnual}
+                  onChange={e => set('interestRateAnnual', e.target.value)}
+                  placeholder="e.g. 12"
+                  icon={Percent}
+                  type="number"
+                />
+                {errors.interestRateAnnual && <span style={{ fontSize: '0.72rem', color: t.overdue }}>{errors.interestRateAnnual}</span>}
+              </FormField>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <FormField t={t} label="Payment Frequency">
+                <select
+                  value={form.paymentFrequency}
+                  onChange={e => set('paymentFrequency', e.target.value)}
+                  className="rounded-xl px-4 w-full"
+                  style={{ background: t.bgSubtle, border: `1.5px solid ${t.border}`, height: 52, color: t.text, fontSize: '0.9rem' }}
+                >
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </FormField>
+
+              <FormField t={t} label="Total Installments">
+                <TextInput
+                  t={t}
+                  value={form.installments}
+                  onChange={e => set('installments', e.target.value)}
+                  placeholder="e.g. 30"
+                  icon={Clock}
+                  type="number"
+                />
+                {errors.installments && <span style={{ fontSize: '0.72rem', color: t.overdue }}>{errors.installments}</span>}
+              </FormField>
+            </div>
+
+            {/* Calculations Preview Card */}
+            {principalAmt > 0 && (
+              <div 
+                className="p-4 rounded-xl flex flex-col gap-2 mt-2" 
+                style={{ background: `linear-gradient(135deg, ${t.primary}0B, ${t.accent}05)`, border: `1px solid ${t.border}` }}
+              >
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Installment calculation preview
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span style={{ fontSize: '0.8rem', color: t.textMuted }}>Installment Amount ({form.paymentFrequency}):</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: t.primary }}>Rs. {installmentAmt.toLocaleString('en-LK')}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span style={{ color: t.textMuted }}>Total Interest ({form.interestRateAnnual}%):</span>
+                  <span style={{ fontWeight: 600, color: t.text }}>Rs. {interestAmt.toLocaleString('en-LK')}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span style={{ color: t.textMuted }}>Total Repayable:</span>
+                  <span style={{ fontWeight: 600, color: t.text }}>Rs. {totalRepayable.toLocaleString('en-LK')}</span>
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* Document upload dropzone */}

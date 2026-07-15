@@ -121,6 +121,14 @@ const createPayment = asyncHandler(async (req, res) => {
 
   // ─── Business logic: update loan balance & status ───────────────────────
   loan.balance = Math.max(0, loan.balance - paymentAmount);
+  
+  // Recalculate installments paid
+  const rate = (loan.interestRate || 0) / 100;
+  const totalRepayable = loan.amount * (1 + rate);
+  const instAmt = Math.round(totalRepayable / (loan.installments || 1));
+  const repaidAmt = totalRepayable - loan.balance;
+  loan.installmentsPaid = Math.min(loan.installments || 1, Math.round(repaidAmt / (instAmt || 1)));
+
   loan.recalculateStatus();
   await loan.save();
 

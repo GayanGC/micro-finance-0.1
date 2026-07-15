@@ -1,4 +1,4 @@
-import { Home, CreditCard, HandCoins, Users, BarChart2, UserCheck, CalendarDays, CalendarOff, BookOpen } from 'lucide-react';
+import { Home, CreditCard, HandCoins, Users, BarChart2, UserCheck, CalendarDays, CalendarOff, BookOpen, DollarSign, HelpCircle } from 'lucide-react';
 
 const NAV_ITEMS = [
   { key: 'dashboard',   label: 'Home',      Icon: Home },
@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { key: 'attendance',  label: 'Attend.',   Icon: CalendarDays },
   { key: 'leave',       label: 'Leave',     Icon: CalendarOff },
   { key: 'policies',    label: 'Policies',  Icon: BookOpen },
+  { key: 'salaries',    label: 'Salaries',  Icon: DollarSign },
+  { key: 'support',     label: 'Support',   Icon: HelpCircle },
 ];
 
 // BottomNav — fixed mobile tab bar (< 1024px) — horizontally scrollable

@@ -194,3 +194,41 @@ export const updatePolicy = (id, data) =>
   apiRequest(`/policies/${id}`, { method: 'PUT', body: data });
 export const deletePolicy = (id) =>
   apiRequest(`/policies/${id}`, { method: 'DELETE' });
+
+// ── Salary API ──────────────────────────────────────────────────────────────
+export const getSalaryRecords = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/salaries/records${params ? '?' + params : ''}`);
+};
+export const createSalaryRecord = (data) =>
+  apiRequest('/salaries/records', { method: 'POST', body: data });
+export const updateSalaryRecord = (id, data) =>
+  apiRequest(`/salaries/records/${id}`, { method: 'PUT', body: data });
+
+export const requestAdvance = (data) =>
+  apiRequest('/salaries/advances', { method: 'POST', body: data });
+export const getAdvances = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/salaries/advances${params ? '?' + params : ''}`);
+};
+export const reviewAdvance = (id, data) =>
+  apiRequest(`/salaries/advances/${id}/review`, { method: 'PUT', body: data });
+
+export const requestEmployeeLoan = (data) =>
+  apiRequest('/salaries/loans', { method: 'POST', body: data });
+export const getEmployeeLoans = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/salaries/loans${params ? '?' + params : ''}`);
+};
+export const reviewEmployeeLoan = (id, data) =>
+  apiRequest(`/salaries/loans/${id}/review`, { method: 'PUT', body: data });
+export const repayEmployeeLoan = (id, data) =>
+  apiRequest(`/salaries/loans/${id}/repay`, { method: 'POST', body: data });
+
+// ── Questions / Support API ──────────────────────────────────────────────────
+export const askQuestion = (data) =>
+  apiRequest('/questions', { method: 'POST', body: data });
+export const getQuestions = () =>
+  apiRequest('/questions');
+export const answerQuestion = (id, data) =>
+  apiRequest(`/questions/${id}/answer`, { method: 'PUT', body: data });
