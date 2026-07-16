@@ -261,9 +261,4 @@ export const payInstallment = (id, data) =>
 export const deleteRepaymentSchedule = (loanId) =>
   apiRequest(`/repayments/loan/${loanId}`, { method: 'DELETE' });
 
-// ── Reports chart data ───────────────────────────────────────────────────────
-export const getReportTrend = () =>
-  apiRequest('/reports/trend');
-export const getReportBreakdown = () =>
-  apiRequest('/reports/breakdown');
 

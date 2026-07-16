@@ -3,7 +3,7 @@ import {
   Home, CreditCard, HandCoins, Users, BarChart2,
   Sun, Moon, CalendarDays, CalendarOff, BookOpen, UserCheck,
   DollarSign, HelpCircle, FileText, ChevronLeft, ChevronRight,
-  LogOut, Settings2
+  LogOut, Settings2, X
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext.jsx';
 
@@ -32,38 +32,49 @@ const NAV_SECTIONS = [
   },
 ];
 
-export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
+export default function Sidebar({ t, current, onNavigate, onToggleTheme, variant = 'desktop', onClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useContext(AuthContext);
 
   const initials = (user?.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
+  const isMobile = variant === 'mobile';
+  // Mobile drawer is never collapsed
+  const isCollapsed = !isMobile && collapsed;
+
+  const handleNav = (key) => {
+    onNavigate(key);
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
   return (
     <aside
-      className="hidden lg:flex flex-col flex-shrink-0 theme-transition"
+      className={isMobile ? "flex flex-col h-full w-full theme-transition" : "hidden lg:flex flex-col flex-shrink-0 theme-transition"}
       style={{
-        width: collapsed ? 72 : 256,
+        width: isMobile ? '100%' : (isCollapsed ? 72 : 256),
         background: t.card,
-        borderRight: `1px solid ${t.border}`,
-        zIndex: 40,
-        position: 'sticky',
-        top: 0,
+        borderRight: isMobile ? 'none' : `1px solid ${t.border}`,
+        zIndex: isMobile ? 210 : 40,
+        position: isMobile ? 'relative' : 'sticky',
+        top: isMobile ? 0 : 0,
         height: '100vh',
         transition: 'width 0.25s cubic-bezier(0.4,0,0.2,1)',
-        boxShadow: t.mode === 'dark'
+        boxShadow: !isMobile && t.mode === 'dark'
           ? '4px 0 32px rgba(0,0,0,0.35)'
-          : '4px 0 24px rgba(15,22,41,0.07)',
+          : (!isMobile ? '4px 0 24px rgba(15,22,41,0.07)' : 'none'),
         overflow: 'hidden',
       }}
     >
-      {/* Logo + Collapse toggle */}
+      {/* Logo + Collapse toggle / Close button */}
       <div
         className="flex items-center flex-shrink-0"
         style={{
           height: 72,
           borderBottom: `1px solid ${t.border}`,
-          padding: collapsed ? '0 16px' : '0 16px 0 20px',
-          justifyContent: collapsed ? 'center' : 'space-between',
+          padding: isCollapsed ? '0 16px' : '0 16px 0 20px',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
         }}
       >
         {/* Logo mark */}
@@ -79,7 +90,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
           >
             <span style={{ fontFamily: 'Poppins', fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>MF</span>
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div style={{ overflow: 'hidden' }}>
               <div style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.95rem', color: t.text, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                 MicroFinance
@@ -91,24 +102,38 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
           )}
         </div>
 
-        {/* Collapse toggle */}
-        {!collapsed && (
+        {/* Action button: Collapse toggle for desktop, Close button for mobile */}
+        {isMobile ? (
           <button
-            onClick={() => setCollapsed(true)}
+            onClick={onClose}
             className="flex items-center justify-center btn-press"
             style={{
-              width: 28, height: 28, borderRadius: 8,
+              width: 32, height: 32, borderRadius: 8,
               background: t.bgSubtle, border: `1px solid ${t.border}`,
               cursor: 'pointer', flexShrink: 0,
             }}
           >
-            <ChevronLeft size={14} color={t.textMuted} />
+            <X size={16} color={t.textMuted} />
           </button>
+        ) : (
+          !isCollapsed && (
+            <button
+              onClick={() => setCollapsed(true)}
+              className="flex items-center justify-center btn-press"
+              style={{
+                width: 28, height: 28, borderRadius: 8,
+                background: t.bgSubtle, border: `1px solid ${t.border}`,
+                cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              <ChevronLeft size={14} color={t.textMuted} />
+            </button>
+          )
         )}
       </div>
 
-      {/* Expand button (when collapsed) */}
-      {collapsed && (
+      {/* Expand button (when collapsed on desktop) */}
+      {!isMobile && isCollapsed && (
         <button
           onClick={() => setCollapsed(false)}
           className="flex items-center justify-center btn-press mx-auto mt-3"
@@ -127,7 +152,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
         {NAV_SECTIONS.map(({ label, items }, sectionIdx) => (
           <div key={label} style={{ marginBottom: 4 }}>
             {/* Section label */}
-            {sectionIdx > 0 && !collapsed && (
+            {sectionIdx > 0 && !isCollapsed && (
               <div style={{ margin: '10px 6px 6px', paddingTop: 10, borderTop: `1px solid ${t.border}` }}>
                 <span style={{
                   fontSize: '0.58rem', fontWeight: 700,
@@ -138,7 +163,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
                 </span>
               </div>
             )}
-            {sectionIdx > 0 && collapsed && (
+            {sectionIdx > 0 && isCollapsed && (
               <div style={{ height: 1, background: t.border, margin: '10px 12px' }} />
             )}
 
@@ -148,12 +173,12 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
                 return (
                   <button
                     key={key}
-                    onClick={() => onNavigate(key)}
-                    title={collapsed ? itemLabel : ''}
+                    onClick={() => handleNav(key)}
+                    title={isCollapsed ? itemLabel : ''}
                     className="flex items-center btn-press w-full text-left"
                     style={{
-                      padding: collapsed ? '10px 0' : '10px 12px',
-                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      padding: isCollapsed ? '10px 0' : '10px 12px',
+                      justifyContent: isCollapsed ? 'center' : 'flex-start',
                       gap: 10,
                       borderRadius: 11,
                       background: active
@@ -178,7 +203,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
                     }}
                   >
                     {/* Active indicator bar */}
-                    {active && !collapsed && (
+                    {active && !isCollapsed && (
                       <div style={{
                         position: 'absolute', left: 0, top: '20%', bottom: '20%',
                         width: 3, borderRadius: 99,
@@ -203,7 +228,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
                     </div>
 
                     {/* Label */}
-                    {!collapsed && (
+                    {!isCollapsed && (
                       <span style={{
                         fontSize: '0.85rem',
                         fontWeight: active ? 700 : 500,
@@ -219,7 +244,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
                     )}
 
                     {/* Active dot */}
-                    {active && !collapsed && (
+                    {active && !isCollapsed && (
                       <span style={{
                         width: 6, height: 6, borderRadius: '50%',
                         background: t.primary, flexShrink: 0,
@@ -237,7 +262,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
       {/* Bottom section: user profile + theme toggle */}
       <div style={{ padding: '10px 10px 14px', borderTop: `1px solid ${t.border}`, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* User info */}
-        {!collapsed && user && (
+        {!isCollapsed && user && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 12px', borderRadius: 12,
@@ -247,7 +272,8 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
             <div style={{
               width: 34, height: 34, borderRadius: '50%',
               background: t.gradientPrimary || `linear-gradient(135deg, ${t.primary}, ${t.primary}BB)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyItems: 'center',
+              justifyContent: 'center', alignContent: 'center',
               flexShrink: 0, fontFamily: 'Poppins', fontWeight: 700,
               fontSize: '0.8rem', color: '#fff',
             }}>
@@ -268,10 +294,10 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
         <button
           onClick={onToggleTheme}
           className="flex items-center gap-3 btn-press w-full text-left"
-          title={collapsed ? (t.mode === 'light' ? 'Dark Mode' : 'Light Mode') : ''}
+          title={isCollapsed ? (t.mode === 'light' ? 'Dark Mode' : 'Light Mode') : ''}
           style={{
-            padding: collapsed ? '10px 0' : '10px 12px',
-            justifyContent: collapsed ? 'center' : 'flex-start',
+            padding: isCollapsed ? '10px 0' : '10px 12px',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
             borderRadius: 11, background: 'transparent',
             border: '1.5px solid transparent', cursor: 'pointer',
             transition: 'all 0.18s ease',
@@ -285,7 +311,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
               : <Sun size={16} color={t.textMuted} strokeWidth={2} />
             }
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <>
               <span style={{ fontSize: '0.85rem', fontWeight: 500, color: t.text, flex: 1, whiteSpace: 'nowrap' }}>
                 {t.mode === 'light' ? 'Dark Mode' : 'Light Mode'}
@@ -308,7 +334,7 @@ export default function Sidebar({ t, current, onNavigate, onToggleTheme }) {
         </button>
 
         {/* Version */}
-        {!collapsed && (
+        {!isCollapsed && (
           <div style={{ textAlign: 'center', fontSize: '0.58rem', color: t.textMuted, fontWeight: 500, opacity: 0.6, marginTop: 4 }}>
             v0.2 — MicroFinance Platform
           </div>
