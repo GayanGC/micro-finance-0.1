@@ -5,6 +5,16 @@ import Stamp from '../components/Stamp.jsx';
 import { formatRs } from '../theme.js';
 import { getLoans, getLoan } from '../api/client.js';
 
+const outlineBtn = (color) => ({
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  padding: '10px 18px', borderRadius: 12,
+  border: `1.5px solid ${color}45`,
+  background: `${color}0F`, color,
+  fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+  fontFamily: 'Poppins', transition: 'all 0.18s ease', width: '100%',
+  justifyContent: 'center',
+});
+
 const FILTER_OPTIONS = [
   { key: 'All',       label: 'All Loans',  Icon: null },
   { key: 'Insurance', label: 'Insurance',  Icon: Shield },
@@ -442,6 +452,14 @@ export default function LoansScreen({ t, onNavigate, onToggleTheme, onOpenSettin
                     </div>
                   )}
                 </div>
+
+                {/* Repayment Schedule Button */}
+                <button
+                  onClick={() => { setModalOpen(false); onNavigate('repayment', { loanId: selectedLoan._id }); }}
+                  style={{ ...outlineBtn(t.primary), marginBottom: 8 }}
+                >
+                  <Calendar size={16} /> View Repayment Schedule
+                </button>
 
                 {/* Customer Report Printer button */}
                 <button

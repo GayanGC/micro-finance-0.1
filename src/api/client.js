@@ -232,3 +232,38 @@ export const getQuestions = () =>
   apiRequest('/questions');
 export const answerQuestion = (id, data) =>
   apiRequest(`/questions/${id}/answer`, { method: 'PUT', body: data });
+
+// ── ETF/EPF API ──────────────────────────────────────────────────────────────
+export const getETFEPFRecords = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/etfepf${params ? '?' + params : ''}`);
+};
+export const getETFEPFSummary = (filters = {}) => {
+  const params = new URLSearchParams(filters).toString();
+  return apiRequest(`/etfepf/summary${params ? '?' + params : ''}`);
+};
+export const bulkGenerateETFEPF = (data) =>
+  apiRequest('/etfepf/bulk', { method: 'POST', body: data });
+export const createETFEPFRecord = (data) =>
+  apiRequest('/etfepf', { method: 'POST', body: data });
+export const updateETFEPFRecord = (id, data) =>
+  apiRequest(`/etfepf/${id}`, { method: 'PUT', body: data });
+export const deleteETFEPFRecord = (id) =>
+  apiRequest(`/etfepf/${id}`, { method: 'DELETE' });
+
+// ── Repayment API ────────────────────────────────────────────────────────────
+export const generateRepaymentSchedule = (loanId) =>
+  apiRequest(`/repayments/generate/${loanId}`, { method: 'POST' });
+export const getLoanRepayments = (loanId) =>
+  apiRequest(`/repayments/${loanId}`);
+export const payInstallment = (id, data) =>
+  apiRequest(`/repayments/${id}/pay`, { method: 'PUT', body: data });
+export const deleteRepaymentSchedule = (loanId) =>
+  apiRequest(`/repayments/loan/${loanId}`, { method: 'DELETE' });
+
+// ── Reports chart data ───────────────────────────────────────────────────────
+export const getReportTrend = () =>
+  apiRequest('/reports/trend');
+export const getReportBreakdown = () =>
+  apiRequest('/reports/breakdown');
+

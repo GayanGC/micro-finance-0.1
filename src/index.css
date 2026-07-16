@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ─── Global resets & base ────────────────────────────── */
@@ -32,10 +32,10 @@ body {
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     border-radius: 99px;
-    background: rgba(100,120,115,0.25);
+    background: rgba(100,120,160,0.2);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(100,120,115,0.45);
+    background: rgba(100,120,160,0.4);
   }
 }
 
@@ -47,10 +47,10 @@ nav { -ms-overflow-style: none; scrollbar-width: none; }
 .theme-transition,
 .theme-transition * {
   transition:
-    background-color 0.25s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    background-color 0.3s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 /* ─── Ink stamp badge ─────────────────────────────────── */
@@ -65,13 +65,13 @@ nav { -ms-overflow-style: none; scrollbar-width: none; }
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  transform: rotate(-3deg);
+  transform: rotate(-2deg);
   line-height: 1.6;
   white-space: nowrap;
   font-family: 'Inter', sans-serif;
 }
 
-/* ─── Ripple / press animation ───────────────────────── */
+/* ─── Button animations ───────────────────────── */
 @keyframes press {
   0%   { transform: scale(1); }
   40%  { transform: scale(0.95); }
@@ -82,17 +82,24 @@ nav { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ─── Fade-in for screen transitions ─────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.screen-enter { animation: fadeIn 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
+.screen-enter { animation: fadeIn 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
 
 /* ─── Slide-up for new screen push ───────────────────── */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(28px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.screen-slide-up { animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+.screen-slide-up { animation: slideUp 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ─── Slide in from right ─────────────────────────────── */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right { animation: slideInRight 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
 
 /* ─── Modal backdrop ──────────────────────────────────── */
 @keyframes backdropIn {
@@ -100,17 +107,17 @@ nav { -ms-overflow-style: none; scrollbar-width: none; }
   to   { opacity: 1; }
 }
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  from { opacity: 0; transform: scale(0.92) translateY(16px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 .modal-backdrop { animation: backdropIn 0.2s ease forwards; }
-.modal-card     { animation: modalIn 0.25s cubic-bezier(0.22,1,0.36,1) forwards; }
+.modal-card     { animation: modalIn 0.28s cubic-bezier(0.22,1,0.36,1) forwards; }
 
 /* ─── Collection row check animation ─────────────────── */
 @keyframes checkPop {
   0%   { transform: scale(0.8) rotate(-4deg); opacity: 0; }
   60%  { transform: scale(1.1) rotate(-5deg); opacity: 1; }
-  100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-2deg); opacity: 1; }
 }
 .stamp-pop { animation: checkPop 0.3s ease forwards; }
 
@@ -120,30 +127,53 @@ nav { -ms-overflow-style: none; scrollbar-width: none; }
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #e2ddd6 25%, #ede9e0 50%, #e2ddd6 75%);
+  background: linear-gradient(90deg, #E2E6F0 25%, #ECEEF8 50%, #E2E6F0 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.6s infinite;
   border-radius: 10px;
 }
 .dark .skeleton {
-  background: linear-gradient(90deg, #1e2e2a 25%, #243530 50%, #1e2e2a 75%);
+  background: linear-gradient(90deg, #141D35 25%, #1A2440 50%, #141D35 75%);
   background-size: 200% 100%;
 }
 
 /* ─── Pulse dot (for pending status) ─────────────────── */
 @keyframes pulseDot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(0.8); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
 }
-.pulse-dot { animation: pulseDot 1.5s ease infinite; }
+.pulse-dot { animation: pulseDot 1.8s ease infinite; }
+
+/* ─── Float animation ─────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+.float-anim { animation: float 3s ease-in-out infinite; }
+
+/* ─── Glow pulse ──────────────────────────────────────── */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(26,86,219,0.3); }
+  50%       { box-shadow: 0 0 24px rgba(26,86,219,0.6); }
+}
+.glow-pulse { animation: glowPulse 2s ease-in-out infinite; }
+
+/* ─── Number count-up ─────────────────────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.count-up { animation: countUp 0.4s ease forwards; }
 
 /* ─── Chart tooltip ───────────────────────────────────── */
 .chart-tooltip {
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 12px;
+  padding: 10px 16px;
   font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
 }
 
 /* ─── Input base resets ───────────────────────────────── */
@@ -158,3 +188,85 @@ input:focus, textarea:focus, select:focus {
 
 /* ─── No text selection on interactive elements ───────── */
 button { -webkit-tap-highlight-color: transparent; }
+
+/* ─── Premium Card Glass ──────────────────────────────── */
+.glass-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ─── Gradient text ───────────────────────────────────── */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #1A56DB, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-accent {
+  background: linear-gradient(135deg, #D97706, #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Status badge styles ─────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ─── Progress bar ────────────────────────────────────── */
+.progress-bar {
+  height: 6px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.08);
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ─── Table styles ────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  text-align: left;
+}
+.data-table td {
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+.data-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+/* ─── Print styles ────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white !important; color: black !important; }
+}
+.print-only { display: none; }
+
+/* ─── Sidebar collapsed state ─────────────────────────── */
+.sidebar-mini { width: 72px !important; }
+.sidebar-mini .sidebar-label { display: none; }
+.sidebar-mini .sidebar-section-label { display: none; }

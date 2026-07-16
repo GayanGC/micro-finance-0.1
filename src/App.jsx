@@ -17,13 +17,21 @@ import LeaveScreen from './screens/LeaveScreen.jsx';
 import PolicyScreen from './screens/PolicyScreen.jsx';
 import SalariesScreen from './screens/SalariesScreen.jsx';
 import SupportScreen from './screens/SupportScreen.jsx';
+import ETFEPFScreen from './screens/ETFEPFScreen.jsx';
+import LoanRepaymentScreen from './screens/LoanRepaymentScreen.jsx';
 
 // Navigation shell
 import BottomNav from './components/BottomNav.jsx';
 import Sidebar from './components/Sidebar.jsx';
 
-// Main nav tabs
-const MAIN_SCREENS = ['dashboard', 'loans', 'collection', 'customers', 'reports', 'employees', 'attendance', 'leave', 'policies', 'salaries', 'support'];
+// Main nav tabs (all navigable top-level screens)
+const MAIN_SCREENS = [
+  'dashboard', 'loans', 'collection', 'customers', 'reports',
+  'employees', 'attendance', 'leave', 'policies', 'salaries', 'support', 'etfepf'
+];
+
+// Sub-screens that get a "back" button
+const SUB_SCREENS = ['newloan', 'settings', 'repayment'];
 
 export default function App() {
   // ── Theme ──────────────────────────────────────────────────────────
@@ -38,17 +46,19 @@ export default function App() {
 
   // ── Screen navigation ─────────────────────────────────────────────
   const [currentScreen, setCurrentScreen] = useState('dashboard');
-  // Stack for sub-screens that get "back" button (newloan, settings)
   const [screenStack, setScreenStack] = useState([]);
+  // Extra params for sub-screens (e.g. loanId for repayment)
+  const [screenParams, setScreenParams] = useState({});
 
-  function navigate(screen) {
-    // Sub-screens pushed onto stack
-    if (screen === 'newloan' || screen === 'settings') {
+  function navigate(screen, params = {}) {
+    if (SUB_SCREENS.includes(screen)) {
       setScreenStack(s => [...s, currentScreen]);
       setCurrentScreen(screen);
+      setScreenParams(params);
     } else {
       setScreenStack([]);
       setCurrentScreen(screen);
+      setScreenParams({});
     }
   }
 
@@ -57,11 +67,14 @@ export default function App() {
       const prev = screenStack[screenStack.length - 1];
       setScreenStack(s => s.slice(0, -1));
       setCurrentScreen(prev);
+      setScreenParams({});
     }
   }
 
-  const activeTab = MAIN_SCREENS.includes(currentScreen) ? currentScreen : screenStack[0] || 'dashboard';
-  const isSubScreen = currentScreen === 'newloan' || currentScreen === 'settings';
+  const activeTab = MAIN_SCREENS.includes(currentScreen)
+    ? currentScreen
+    : screenStack.find(s => MAIN_SCREENS.includes(s)) || 'dashboard';
+  const isSubScreen = SUB_SCREENS.includes(currentScreen);
 
   // ── Loading state for token verification ──────────────────────────
   if (authLoading) {
@@ -140,6 +153,15 @@ export default function App() {
         {currentScreen === 'newloan' && (
           <NewLoanScreen
             t={t}
+            onBack={goBack}
+            onToggleTheme={toggleTheme}
+          />
+        )}
+
+        {currentScreen === 'repayment' && (
+          <LoanRepaymentScreen
+            t={t}
+            loanId={screenParams.loanId}
             onBack={goBack}
             onToggleTheme={toggleTheme}
           />
@@ -231,6 +253,14 @@ export default function App() {
             onOpenSettings={() => navigate('settings')}
           />
         )}
+
+        {currentScreen === 'etfepf' && (
+          <ETFEPFScreen
+            t={t}
+            onToggleTheme={toggleTheme}
+            onOpenSettings={() => navigate('settings')}
+          />
+        )}
       </main>
 
       {/* Mobile bottom nav (hidden on sub-screens for cleaner UX) */}
@@ -244,4 +274,3 @@ export default function App() {
     </div>
   );
 }
-
