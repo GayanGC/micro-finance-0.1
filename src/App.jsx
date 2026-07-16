@@ -202,11 +202,18 @@ export default function App() {
           flexDirection: 'column',
           minHeight: '100vh',
           minWidth: 0,
-          // Gap from sidebar on desktop is handled by sidebar width
         }}
-        className="w-full overflow-x-hidden"
+        className="w-full overflow-x-hidden lg:p-4"
       >
-        {renderScreen()}
+        <div
+          className="flex flex-col flex-1 lg:rounded-2xl lg:border lg:shadow-sm overflow-hidden"
+          style={{
+            background: t.bg,
+            borderColor: t.border,
+          }}
+        >
+          {renderScreen()}
+        </div>
       </main>
 
       {/* ══ MOBILE BOTTOM NAV (hidden on sub-screens) ══ */}
