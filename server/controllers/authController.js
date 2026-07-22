@@ -45,6 +45,10 @@ const login = asyncHandler(async (req, res) => {
 
   const token = generateToken(user);
 
+  // Check if customer profile exists for this user
+  const Customer = require('../models/Customer');
+  const customer = await Customer.findOne({ $or: [{ user: user._id }, { phone: user.phone }] });
+
   res.status(200).json({
     success: true,
     message: 'Login successful',
@@ -57,6 +61,7 @@ const login = asyncHandler(async (req, res) => {
         email: user.email,
         role: user.role,
         branch: user.branch,
+        customerId: customer?._id || null,
       },
     },
   });

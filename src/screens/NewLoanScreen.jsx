@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Shield, Clock, Briefcase, Upload, Check, User, DollarSign, Percent, AlertCircle, Phone, MapPin, CreditCard } from 'lucide-react';
 import TopBar from '../components/TopBar.jsx';
 import PrimaryButton from '../components/PrimaryButton.jsx';
-import { getCustomers, createCustomer, createLoan } from '../api/client.js';
+import { getCustomers, createCustomer, createLoan, getPolicies } from '../api/client.js';
 
 const LOAN_TYPES = ['Insurance', 'Daily', 'Wage'];
 const LOAN_TYPE_ICONS = { Insurance: Shield, Daily: Clock, Wage: Briefcase };
@@ -50,6 +50,7 @@ function TextInput({ t, value, onChange, placeholder, icon: Icon, type = 'text',
 export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
   const [form, setForm] = useState({
     loanType: 'Daily',
+    selectedPolicyId: '',
     amount: '',
     interestRateMonthly: '',
     interestRateAnnual: '',
@@ -57,6 +58,8 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
     installments: '30',
     guarantor: '',
   });
+
+  const [policiesList, setPoliciesList] = useState([]);
 
   // Customer search state
   const [customerSearch, setCustomerSearch] = useState('');
@@ -88,6 +91,37 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
       }
       return updated;
     }); 
+  }
+
+  // Load Policies / Loan Schemes on mount
+  useEffect(() => {
+    async function loadPolicies() {
+      try {
+        const res = await getPolicies();
+        if (res && res.success) {
+          setPoliciesList(res.data || []);
+        }
+      } catch (e) {
+        console.error('Error loading policies:', e);
+      }
+    }
+    loadPolicies();
+  }, []);
+
+  function handlePolicySelect(policyId) {
+    const policy = policiesList.find(p => p._id === policyId);
+    if (policy) {
+      setForm(f => ({
+        ...f,
+        selectedPolicyId: policy._id,
+        interestRateMonthly: policy.interestRateMonthly ? String(policy.interestRateMonthly) : f.interestRateMonthly,
+        interestRateAnnual: policy.interestRateMonthly ? String((policy.interestRateMonthly * 12).toFixed(2)) : f.interestRateAnnual,
+        paymentFrequency: policy.paymentFrequency || f.paymentFrequency,
+        installments: policy.maxInstallments ? String(policy.maxInstallments) : f.installments,
+      }));
+    } else {
+      set('selectedPolicyId', '');
+    }
   }
 
   // Search suggestions useEffect
@@ -171,6 +205,7 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
       const loanRes = await createLoan({
         customer: finalCustomerId,
         type: form.loanType,
+        policy: form.selectedPolicyId || undefined,
         amount: principalAmt,
         interestRate: Number(form.interestRateAnnual) || 0,
         interestRateMonthly: Number(form.interestRateMonthly) || 0,
@@ -366,6 +401,23 @@ export default function NewLoanScreen({ t, onBack, onToggleTheme }) {
             <h3 style={{ fontFamily: 'Poppins', fontWeight: 700, fontSize: '0.88rem', color: t.text }}>
               Loan Details
             </h3>
+
+            {/* Loan Policy Scheme selector */}
+            <FormField t={t} label="Loan Policy Scheme (Optional Preset)">
+              <select
+                value={form.selectedPolicyId}
+                onChange={e => handlePolicySelect(e.target.value)}
+                className="rounded-xl px-4 w-full"
+                style={{ background: t.bgSubtle, border: `1.5px solid ${t.border}`, height: 52, color: t.text, fontSize: '0.88rem', fontWeight: 600 }}
+              >
+                <option value="">-- Standard Rate (No Specific Policy) --</option>
+                {policiesList.map(pol => (
+                  <option key={pol._id} value={pol._id}>
+                    {pol.title} ({pol.category}) — {pol.interestRateMonthly || 0}% / mo [{pol.paymentFrequency || 'Daily'}]
+                  </option>
+                ))}
+              </select>
+            </FormField>
 
             {/* Loan type toggle */}
             <FormField t={t} label="Loan Type">

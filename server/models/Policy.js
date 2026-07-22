@@ -20,6 +20,20 @@ const policySchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    interestRateMonthly: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    paymentFrequency: {
+      type: String,
+      enum: ['Daily', 'Weekly', 'Monthly'],
+      default: 'Daily',
+    },
+    maxInstallments: {
+      type: Number,
+      default: 30,
+    },
     isActive: {
       type: Boolean,
       default: true,

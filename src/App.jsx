@@ -19,6 +19,7 @@ import SalariesScreen     from './screens/SalariesScreen.jsx';
 import SupportScreen      from './screens/SupportScreen.jsx';
 import ETFEPFScreen       from './screens/ETFEPFScreen.jsx';
 import LoanRepaymentScreen from './screens/LoanRepaymentScreen.jsx';
+import CustomerPortalScreen from './screens/CustomerPortalScreen.jsx';
 
 // Shell
 import BottomNav from './components/BottomNav.jsx';
@@ -110,6 +111,16 @@ export default function App() {
     return (
       <div className="theme-transition" style={{ minHeight: '100vh', background: t.bg }}>
         <LoginScreen t={t} onToggleTheme={toggleTheme} />
+      </div>
+    );
+  }
+
+  /* ── Customer Portal Gate ── */
+  const { user } = useContext(AuthContext);
+  if (user?.role === 'customer') {
+    return (
+      <div className="theme-transition" style={{ minHeight: '100vh', background: t.bg }}>
+        <CustomerPortalScreen t={t} onToggleTheme={toggleTheme} />
       </div>
     );
   }

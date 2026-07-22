@@ -1,162 +1,162 @@
-// ─── Design System: MicroFinance Premium Theme v2 ───────────────────────────
-// Extended color tokens for light and dark mode with glass, gradient support.
+// ─── Design System: MicroFinance Executive Theme v3 ───────────────────────────
+// Premium color tokens for Light and Dark modes with glassmorphism & gradients.
 
 export const LIGHT = {
   mode: 'light',
 
   // Backgrounds
-  bg:        '#F4F6FB',
-  bgSubtle:  '#EAECF5',
-  bgDeep:    '#E0E4F0',
-  card:      '#FFFFFF',
-  cardHover: '#FAFBFF',
-  border:    '#E2E6F0',
-  borderStrong: '#CDD3E2',
+  bg:           '#F8FAFC',
+  bgSubtle:     '#F1F5F9',
+  bgDeep:       '#E2E8F0',
+  card:         '#FFFFFF',
+  cardHover:    '#F8FAFC',
+  border:       '#E2E8F0',
+  borderStrong: '#CBD5E1',
 
   // Text
-  text:      '#0F1629',
-  textMuted: '#6B7A9A',
-  textLight: '#9BA8C0',
+  text:      '#0F172A',
+  textMuted: '#64748B',
+  textLight: '#94A3B8',
 
-  // Primary — Deep Teal/Blue
-  primary:     '#1A56DB',
-  onPrimary:   '#FFFFFF',
-  primarySoft: '#1A56DB14',
-  primaryMid:  '#1A56DB30',
-  primaryHover:'#1648C4',
+  // Primary — Executive Blue
+  primary:      '#2563EB',
+  onPrimary:    '#FFFFFF',
+  primarySoft:  'rgba(37, 99, 235, 0.08)',
+  primaryMid:   'rgba(37, 99, 235, 0.18)',
+  primaryHover: '#1D4ED8',
 
-  // Accent — Amber/Gold
+  // Accent — Amber / Gold
   accent:     '#D97706',
-  accentSoft: '#D977061A',
-  accentMid:  '#D9770630',
+  accentSoft: 'rgba(217, 119, 6, 0.08)',
+  accentMid:  'rgba(217, 119, 6, 0.18)',
 
   // Success
-  success:     '#059669',
-  successSoft: '#05966914',
+  success:     '#10B981',
+  successSoft: 'rgba(16, 185, 129, 0.08)',
 
   // Info
-  info:     '#0891B2',
-  infoSoft: '#0891B214',
+  info:     '#06B6D4',
+  infoSoft: 'rgba(6, 182, 212, 0.08)',
 
   // Status colors
-  active:  '#059669',
-  activeSoft: '#05966914',
-  overdue: '#DC2626',
-  overdueSoft: '#DC262614',
-  paid:    '#059669',
-  pending: '#D97706',
-  pendingSoft: '#D9770614',
+  active:      '#10B981',
+  activeSoft:  'rgba(16, 185, 129, 0.08)',
+  overdue:     '#EF4444',
+  overdueSoft: 'rgba(239, 68, 68, 0.08)',
+  paid:        '#10B981',
+  pending:     '#F59E0B',
+  pendingSoft: 'rgba(245, 158, 11, 0.08)',
 
   // Semantic
-  danger:     '#DC2626',
-  dangerSoft: '#DC262614',
-  warning:    '#F59E0B',
-  warningSoft:'#F59E0B14',
+  danger:      '#EF4444',
+  dangerSoft:  'rgba(239, 68, 68, 0.08)',
+  warning:     '#F59E0B',
+  warningSoft: 'rgba(245, 158, 11, 0.08)',
 
   // Gradients
-  gradientPrimary:  'linear-gradient(135deg, #1A56DB, #3B82F6)',
-  gradientAccent:   'linear-gradient(135deg, #D97706, #FBBF24)',
-  gradientSuccess:  'linear-gradient(135deg, #059669, #34D399)',
-  gradientDanger:   'linear-gradient(135deg, #DC2626, #F87171)',
-  gradientCard:     'linear-gradient(145deg, #FFFFFF, #F8FAFF)',
-  gradientBg:       'linear-gradient(160deg, #F4F6FB 0%, #EEF2FF 100%)',
-  gradientHero:     'linear-gradient(135deg, #1A56DB08 0%, #7C3AED06 50%, #05966905 100%)',
+  gradientPrimary: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+  gradientAccent:  'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+  gradientSuccess: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+  gradientDanger:  'linear-gradient(135deg, #DC2626 0%, #EF4444 100%)',
+  gradientCard:    'linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%)',
+  gradientBg:      'linear-gradient(160deg, #F8FAFC 0%, #EEF2FF 100%)',
+  gradientHero:    'linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(16, 185, 129, 0.05) 100%)',
 
   // Glass effect
-  glass:       'rgba(255,255,255,0.75)',
-  glassBorder: 'rgba(255,255,255,0.5)',
-  glassShadow: '0 8px 32px rgba(26,86,219,0.08)',
+  glass:       'rgba(255, 255, 255, 0.82)',
+  glassBorder: 'rgba(255, 255, 255, 0.6)',
+  glassShadow: '0 10px 30px rgba(37, 99, 235, 0.08)',
 
   // Scrollbar
-  scrollThumb: '#C5CCDE',
+  scrollThumb: '#CBD5E1',
 
   // Chart colors
-  chart: ['#1A56DB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#0891B2'],
+  chart: ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'],
 
   // Shadows
-  shadow:   '0 1px 8px rgba(15,22,41,0.06), 0 4px 16px rgba(15,22,41,0.04)',
-  shadowMd: '0 4px 24px rgba(15,22,41,0.10), 0 1px 4px rgba(15,22,41,0.06)',
-  shadowLg: '0 12px 40px rgba(15,22,41,0.14), 0 4px 12px rgba(15,22,41,0.08)',
-  shadowPrimary: '0 4px 20px rgba(26,86,219,0.25)',
+  shadow:   '0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.03)',
+  shadowMd: '0 4px 20px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04)',
+  shadowLg: '0 12px 36px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06)',
+  shadowPrimary: '0 4px 20px rgba(37, 99, 235, 0.22)',
 };
 
 export const DARK = {
   mode: 'dark',
 
   // Backgrounds
-  bg:        '#0A0F1E',
-  bgSubtle:  '#0F1628',
-  bgDeep:    '#070C18',
-  card:      '#141D35',
-  cardHover: '#1A2440',
-  border:    '#1E2A48',
-  borderStrong: '#263356',
+  bg:           '#0B0F19',
+  bgSubtle:     '#111827',
+  bgDeep:       '#070A12',
+  card:         '#1F2937',
+  cardHover:    '#283548',
+  border:       '#374151',
+  borderStrong: '#4B5563',
 
   // Text
-  text:      '#E8EDFB',
-  textMuted: '#7888AB',
-  textLight: '#4A5980',
+  text:      '#F9FAFB',
+  textMuted: '#9CA3AF',
+  textLight: '#6B7280',
 
-  // Primary — Bright Blue (lighter for dark bg)
-  primary:     '#60A5FA',
-  onPrimary:   '#030D24',
-  primarySoft: '#60A5FA1F',
-  primaryMid:  '#60A5FA35',
-  primaryHover:'#93C5FD',
+  // Primary — Electric Blue
+  primary:      '#3B82F6',
+  onPrimary:    '#0B0F19',
+  primarySoft:  'rgba(59, 130, 246, 0.14)',
+  primaryMid:   'rgba(59, 130, 246, 0.25)',
+  primaryHover: '#60A5FA',
 
-  // Accent — Warm Gold
-  accent:     '#FBBF24',
-  accentSoft: '#FBBF2420',
-  accentMid:  '#FBBF2435',
+  // Accent — Gold
+  accent:     '#F59E0B',
+  accentSoft: 'rgba(245, 158, 11, 0.14)',
+  accentMid:  'rgba(245, 158, 11, 0.25)',
 
   // Success
-  success:     '#34D399',
-  successSoft: '#34D3991A',
+  success:     '#10B981',
+  successSoft: 'rgba(16, 185, 129, 0.14)',
 
   // Info
-  info:     '#22D3EE',
-  infoSoft: '#22D3EE1A',
+  info:     '#06B6D4',
+  infoSoft: 'rgba(6, 182, 212, 0.14)',
 
   // Status colors
-  active:  '#34D399',
-  activeSoft: '#34D3991A',
-  overdue: '#F87171',
-  overdueSoft: '#F871711A',
-  paid:    '#34D399',
-  pending: '#FBBF24',
-  pendingSoft: '#FBBF241A',
+  active:      '#10B981',
+  activeSoft:  'rgba(16, 185, 129, 0.14)',
+  overdue:     '#F87171',
+  overdueSoft: 'rgba(248, 113, 113, 0.14)',
+  paid:        '#10B981',
+  pending:     '#F59E0B',
+  pendingSoft: 'rgba(245, 158, 11, 0.14)',
 
   // Semantic
-  danger:     '#F87171',
-  dangerSoft: '#F871711A',
-  warning:    '#FCD34D',
-  warningSoft:'#FCD34D1A',
+  danger:      '#F87171',
+  dangerSoft:  'rgba(248, 113, 113, 0.14)',
+  warning:     '#FBBF24',
+  warningSoft: 'rgba(251, 191, 36, 0.14)',
 
   // Gradients
-  gradientPrimary:  'linear-gradient(135deg, #1D4ED8, #60A5FA)',
-  gradientAccent:   'linear-gradient(135deg, #B45309, #FBBF24)',
-  gradientSuccess:  'linear-gradient(135deg, #065F46, #34D399)',
-  gradientDanger:   'linear-gradient(135deg, #991B1B, #F87171)',
-  gradientCard:     'linear-gradient(145deg, #141D35, #1A2440)',
-  gradientBg:       'linear-gradient(160deg, #0A0F1E 0%, #0D1528 100%)',
-  gradientHero:     'linear-gradient(135deg, #60A5FA0A 0%, #7C3AED08 50%, #34D3990A 100%)',
+  gradientPrimary: 'linear-gradient(135deg, #2563EB 0%, #60A5FA 100%)',
+  gradientAccent:  'linear-gradient(135deg, #D97706 0%, #FBBF24 100%)',
+  gradientSuccess: 'linear-gradient(135deg, #059669 0%, #34D399 100%)',
+  gradientDanger:  'linear-gradient(135deg, #DC2626 0%, #F87171 100%)',
+  gradientCard:    'linear-gradient(145deg, #1F2937 0%, #111827 100%)',
+  gradientBg:      'linear-gradient(160deg, #0B0F19 0%, #111827 100%)',
+  gradientHero:    'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.08) 50%, rgba(16, 185, 129, 0.08) 100%)',
 
   // Glass effect
-  glass:       'rgba(20,29,53,0.8)',
-  glassBorder: 'rgba(96,165,250,0.15)',
-  glassShadow: '0 8px 32px rgba(0,0,0,0.4)',
+  glass:       'rgba(31, 41, 55, 0.85)',
+  glassBorder: 'rgba(75, 85, 99, 0.5)',
+  glassShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
 
   // Scrollbar
-  scrollThumb: '#1E2A48',
+  scrollThumb: '#374151',
 
   // Chart colors
-  chart: ['#60A5FA', '#34D399', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'],
+  chart: ['#3B82F6', '#10B981', '#F59E0B', '#F87171', '#A78BFA', '#06B6D4'],
 
   // Shadows
-  shadow:   '0 1px 8px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2)',
-  shadowMd: '0 4px 24px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.2)',
-  shadowLg: '0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3)',
-  shadowPrimary: '0 4px 20px rgba(96,165,250,0.3)',
+  shadow:   '0 1px 3px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3)',
+  shadowMd: '0 4px 20px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)',
+  shadowLg: '0 12px 36px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4)',
+  shadowPrimary: '0 4px 20px rgba(59, 130, 246, 0.35)',
 };
 
 // Helper: get status color from theme

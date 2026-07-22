@@ -22,6 +22,7 @@ const salaryRoutes       = require('./routes/salaryRoutes');
 const questionRoutes     = require('./routes/questionRoutes');
 const etfEpfRoutes       = require('./routes/etfEpfRoutes');
 const repaymentRoutes    = require('./routes/repaymentRoutes');
+const customerPortalRoutes = require('./routes/customerPortalRoutes');
 
 /**
  * Bootstrap — connect to MongoDB Atlas first, then start Express.
@@ -75,6 +76,7 @@ const bootstrap = async () => {
   app.use('/api/questions',     questionRoutes);
   app.use('/api/etfepf',        etfEpfRoutes);
   app.use('/api/repayments',    repaymentRoutes);
+  app.use('/api/customer-portal', customerPortalRoutes);
 
   // ── 7. 404 handler ─────────────────────────────────────────────────────
   app.use((req, res) => {

@@ -23,6 +23,7 @@ const getLoans = asyncHandler(async (req, res) => {
 
   const loans = await Loan.find(query)
     .populate('customer', 'name phone area')
+    .populate('policy', 'title category interestRateMonthly paymentFrequency maxInstallments')
     .populate('createdBy', 'name')
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -46,6 +47,7 @@ const getLoans = asyncHandler(async (req, res) => {
 const getLoan = asyncHandler(async (req, res) => {
   const loan = await Loan.findById(req.params.id)
     .populate('customer', 'name phone nic area address')
+    .populate('policy', 'title category interestRateMonthly paymentFrequency maxInstallments content')
     .populate('createdBy', 'name phone');
 
   if (!loan) {
@@ -75,7 +77,11 @@ const createLoan = asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: errors.array()[0].msg, statusCode: 400 });
   }
 
-  const { customer, type, amount, interestRate, guarantor, documentUrl, dueDate } = req.body;
+  const {
+    customer, type, policy, amount, interestRate,
+    interestRateMonthly, interestRateAnnual,
+    paymentFrequency, installments, guarantor, documentUrl, dueDate
+  } = req.body;
 
   // Validate customer exists
   const customerDoc = await Customer.findById(customer);
@@ -86,9 +92,14 @@ const createLoan = asyncHandler(async (req, res) => {
   const loan = await Loan.create({
     customer,
     type,
+    policy: policy || null,
     amount: Number(amount),
     balance: Number(amount), // initial balance = full amount
-    interestRate: Number(interestRate) || 0,
+    interestRate: Number(interestRate) || Number(interestRateAnnual) || 0,
+    interestRateMonthly: Number(interestRateMonthly) || (Number(interestRateAnnual) ? Number(interestRateAnnual) / 12 : 0),
+    interestRateAnnual: Number(interestRateAnnual) || Number(interestRate) || 0,
+    paymentFrequency: paymentFrequency || 'Daily',
+    installments: Number(installments) || 30,
     status: 'pending',
     guarantor: guarantor || '',
     documentUrl: documentUrl || '',
@@ -97,6 +108,7 @@ const createLoan = asyncHandler(async (req, res) => {
   });
 
   await loan.populate('customer', 'name phone area');
+  await loan.populate('policy', 'title category interestRateMonthly paymentFrequency maxInstallments');
 
   res.status(201).json({ success: true, data: loan });
 });

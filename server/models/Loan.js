@@ -27,7 +27,12 @@ const loanSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
-    interestRateAnnual: {
+    policy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Policy',
+      default: null,
+    },
+    monthlyInterestAmount: {
       type: Number,
       default: 0,
       min: 0,

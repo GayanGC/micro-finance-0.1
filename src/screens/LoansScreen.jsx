@@ -392,6 +392,12 @@ export default function LoansScreen({ t, onNavigate, onToggleTheme, onOpenSettin
                       INSTALLMENTS & ORIGINATION
                     </h4>
                     <div className="flex flex-col gap-2 p-4 rounded-2xl" style={{ border: `1px solid ${t.border}`, background: t.card }}>
+                      {selectedLoan.policy?.title && (
+                        <div className="flex justify-between text-xs">
+                          <span style={{ color: t.textMuted }}>Governing Policy:</span>
+                          <span style={{ fontWeight: 700, color: t.primary }}>{selectedLoan.policy.title}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-xs">
                         <span style={{ color: t.textMuted }}>Payment Method:</span>
                         <span style={{ fontWeight: 600, color: t.text }}>{selectedLoan.paymentFrequency || 'Daily'} Installments</span>

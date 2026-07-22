@@ -27,6 +27,11 @@ const customerSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

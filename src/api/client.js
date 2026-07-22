@@ -261,4 +261,10 @@ export const payInstallment = (id, data) =>
 export const deleteRepaymentSchedule = (loanId) =>
   apiRequest(`/repayments/loan/${loanId}`, { method: 'DELETE' });
 
-
+// ── Customer Portal API ───────────────────────────────────────────────────────
+export const getCustomerPortalProfile = () =>
+  apiRequest('/customer-portal/profile');
+export const getCustomerPortalLoans = () =>
+  apiRequest('/customer-portal/my-loans');
+export const getCustomerPortalRepayments = (loanId) =>
+  apiRequest(`/customer-portal/repayments/${loanId}`);
